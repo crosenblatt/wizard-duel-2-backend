@@ -1,0 +1,14 @@
+{
+  "name": "reset_password_system",
+  "version": "1.0.0",
+  "description": "Standalone Implementation of Password Reset System for Wizard Duel 2 App",
+  "main": "test.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Vikas Tatineni",
+  "license": "ISC",
+  "dependencies": {
+    "nodemailer": "^5.1.1"
+  }
+}
