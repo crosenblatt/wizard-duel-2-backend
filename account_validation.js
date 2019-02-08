@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs'); 						  // Framework for Secure Password Hashing
-const account_management = require('./account_management.js') // Database Management and Communication Functions
+const account_management = require('./account_management.js'); // Database Management and Communication Functions
 const Verifier = require('email-verifier');					  // API to allow email database verification
 
 /*
@@ -58,7 +58,6 @@ const validateLoginCredentials = async function(username, password) {
 
 	let hash = await account_management.getAccountPassword(username);
 	let validPass = checkPassword(password, hash);
-
 	if (validPass === false) {return 1;}
 
 	return 0;

@@ -96,6 +96,36 @@ const createAccount = async function(usrname, pass, mail) {
 	else {return 0;} 
 }
 
+
+/*
+ * Summary. Function that removes a user account from the database
+ *
+ * @param {String} usrname  The username of the account being rem,oved
+ *
+ * @return {int} Returns a value depending on if account created or invalid information (-1 = Cannot connect to database, 0 = User Removed, 1 = Username Invalid) 
+ */
+const deleteAccount = async function(usrname) {
+	let userExists;
+	try {
+
+		//userExists = await db.collection('User Accounts').find({username: usrname}).limit(1).count(true);
+		userExists = await userAccountExists(usrname);
+		if(userExists === -1){return -1;}	
+
+		if (userExists) {
+			await db.collection('User Accounts').deleteOne({username: usrname});
+		}
+
+	} catch (err) {
+		console.log(err.stack);
+		return -1;
+	}
+
+	if (!userExists) {return 1;}
+	else {return 0;} 
+}
+
+
 /*
  * Summary. Function that updates an account's hashed password
  *
@@ -262,6 +292,7 @@ module.exports = {
 	startDatabaseConnection:startDatabaseConnection,
 	closeDatabaseConnection:closeDatabaseConnection,
 	createAccount: createAccount,
+	deleteAccount: deleteAccount,
 	getAccountPassword: getAccountPassword,
 	updatePassword: updatePassword,
 	getAccountStats: getAccountStats,

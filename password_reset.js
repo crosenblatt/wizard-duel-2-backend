@@ -1,7 +1,7 @@
 const nodemailer = require('nodemailer'); 						// Framework used to send mail to user
 const crypto = require('crypto'); 		  						// Node.js Cryptography Library
 const account_validation = require('./account_validation.js');	// Server Account Validation and Security Functions
-const account_management = require('./account_management.js')   // Database Management and Communication Functions
+const account_management = require('./account_management.js');   // Database Management and Communication Functions
 
 /*
  * Summary. Function that generates temporary password for the user
