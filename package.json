@@ -9,6 +9,9 @@
   "author": "Vikas Tatineni",
   "license": "ISC",
   "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "email-verifier": "^0.4.1",
+    "mongodb": "^3.1.13",
     "nodemailer": "^5.1.1"
   }
 }
