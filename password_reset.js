@@ -70,8 +70,8 @@ const sendPasswordEmail = async function(username, accountEmail) {
 	let transporter = nodemailer.createTransport({
 		service: 'outlook', // Don't want to make our own mail server, so using another mail service
 		auth: {
-			user: 'vtatinen@purdue.edu', /* INSERT EMAIL HERE */
-			pass: 'Neeraja12!' /* INSERT EMAIL PASSWORD HERE */
+			user: '', /* INSERT EMAIL HERE */
+			pass: '' /* INSERT EMAIL PASSWORD HERE */
 		}
 	});
 
