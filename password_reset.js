@@ -77,7 +77,7 @@ const sendPasswordEmail = async function(username, accountEmail) {
 
 	// Object that holds email content
 	let mailOptions = {
-		from: 'vtatinen@purdue.edu', /* INSERT EMAIL HERE */
+		from: '', /* INSERT EMAIL HERE */
 		to: accountEmail,
 		subject: 'Wizard Duel 2 - Password Reset',
 		text: 'Your Temporary Password is ' + tempPassword + '.'
@@ -100,12 +100,3 @@ const sendPasswordEmail = async function(username, accountEmail) {
 module.exports = {
 	sendPasswordEmail: sendPasswordEmail
 };
-
-async function test () {
-	await account_management.startDatabaseConnection();
-	let test = await validateCreationCredentials('help', 'me', 'vtatinen@purdue.edu');
-	console.log(test);
-	await account_management.closeDatabaseConnection();
-}
-
-test();
