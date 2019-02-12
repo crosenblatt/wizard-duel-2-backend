@@ -69,6 +69,8 @@ const createAccount = async function(usrname, pass, mail) {
 		level: 1,
 		rank: -1,
 		eloRating: -1,
+		wins: 0,
+		losses: 0,
 		spellbook: [-1 , -1 , -1 , -1 ,-1]
 	};
 
@@ -201,7 +203,7 @@ const getAccountStats = async function(usrname) {
 		if(userExists === -1){return -1;}	
 
 		if (userExists) {
-			stats = await db.collection('User Accounts').findOne({username: usrname}, {projection: {level: true, rank: true, eloRating: true, _id: false}});
+			stats = await db.collection('User Accounts').findOne({username: usrname}, {projection: {level: true, rank: true, eloRating: true, wins: true, losses: true, _id: false}});
 		}
 
 	} catch (err) {
@@ -213,10 +215,41 @@ const getAccountStats = async function(usrname) {
 	else {return stats;} 
 }
 
+
+/*
+ * Summary. Function that updates the stats of a user account.
+ *
+ * @param {String} usrname 	The username of the account which the stats are being updated
+ * @param {Object} stats    The updated stats of the user account
+ *
+ * @return {int} Returns a value depending on invalid information (-1 = Cannot connect to database, 0 = valid, 1 = Invalid Username) 
+ */
+const updateAccountStats = async function(usrname, stats) {
+	let userExists;
+	try {
+
+		//userExists = await db.collection('User Accounts').find({username: usrname}).limit(1).count(true);
+		userExists = await userAccountExists(usrname);
+		if(userExists === -1){return -1;}	
+
+		if (userExists) {
+			await db.collection('User Accounts').updateOne({username: usrname}, {$set: {level: stats.level, rank: stats.rank, eloRating: stats.eloRating, wins: stats.wins, losses: stats.losses}});
+		}
+
+	} catch (err) {
+		console.log(err.stack);
+		return -1;
+	}
+
+	if (!userExists) {return 1;}
+	else {return 0;} 
+}
+
+
 /*
  * Summary. Function that gets an account's email
  *
- * @param {String} username  The username of the account which the email is being extracted
+ * @param {String} usrname  The username of the account which the email is being extracted
  *
  * @return {int} 	Returns a value depending on invalid information (-1 = Cannot connect to database, 1 = Invalid Username)
  * @return {String} Returns a string of the account's email
@@ -242,6 +275,65 @@ const getAccountEmail = async function(usrname) {
 	else {return mail.email;} 
 }
 
+
+/*
+ * Summary. Function that gets all non-security account information
+ *
+ * @param {String} usrname  The username of the account which the info is being extracted
+ *
+ * @return {int} 	Returns a value depending on invalid information (-1 = Cannot connect to database, 1 = Invalid Username)
+ * @return {Object} Returns an Object with all non-security user information
+ */
+const getAccountInfo = async function(usrname) {
+	let userExists, info;
+	try {
+
+		//userExists = await db.collection('User Accounts').find({username: usrname}).limit(1).count(true);
+		userExists = await userAccountExists(usrname);
+		if(userExists === -1){return -1;}		
+
+		if (userExists) {
+			info = await db.collection('User Accounts').findOne({username: usrname}, {projection: {title: true, level: true, rank: true, eloRating: true, wins: true, losses: true, spellbook: true, _id: false}});
+		}
+
+	} catch (err) {
+		console.log(err.stack);
+		return -1;
+	}
+
+	if (!userExists) {return 1;}
+	else {return info;} 
+}
+
+
+/*
+ * Summary. Function that updates the active title of a user account.
+ *
+ * @param {String} usrname 		 The username of the account which the stats are being updated
+ * @param {ENUM}   active_title  The updated active title of the user account
+ *
+ * @return {int} Returns a value depending on invalid information (-1 = Cannot connect to database, 0 = valid, 1 = Invalid Username) 
+ */
+const updateAccountTitle = async function(usrname, active_title) {
+	let userExists;
+	try {
+
+		//userExists = await db.collection('User Accounts').find({username: usrname}).limit(1).count(true);
+		userExists = await userAccountExists(usrname);
+		if(userExists === -1){return -1;}	
+
+		if (userExists) {
+			await db.collection('User Accounts').updateOne({username: usrname}, {$set: {title: active_title}});
+		}
+
+	} catch (err) {
+		console.log(err.stack);
+		return -1;
+	}
+
+	if (!userExists) {return 1;}
+	else {return 0;} 
+}
 
 /*
  * Summary. Function that checks if email exists in database
@@ -296,7 +388,10 @@ module.exports = {
 	getAccountPassword: getAccountPassword,
 	updatePassword: updatePassword,
 	getAccountStats: getAccountStats,
+	updateAccountStats: updateAccountStats,
 	getAccountEmail: getAccountEmail,
+	getAccountInfo: getAccountInfo,
+	updateAccountTitle: updateAccountTitle,
 	accountEmailExists: accountEmailExists,
 	userAccountExists: userAccountExists
 };

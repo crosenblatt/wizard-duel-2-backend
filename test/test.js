@@ -189,7 +189,7 @@ describe("Backend Tests", function() {
 				} catch(err){
 					throw(err);
 				}
-				console.log(result);
+
 				assert(result === 2);
 			});
 		});
@@ -320,6 +320,178 @@ describe("Backend Tests", function() {
 				}
 				assert(result === 1 && passwordCheck === 1);
 			});
+		});
+
+		describe("#getAccountStats()", function () {
+			//Takes a second to communicate with the database
+			this.slow(3000);
+			it("should return ELO correctly.", async () => {
+				let username, password, hash, email, stats, dbStats, result;
+				username = generateTestString();
+				password = generateTestString();
+				hash = account_validation.hashPassword(password);
+				email = generateTestString();
+
+				stats = {
+					level: Math.floor(Math.random() * 101),
+					rank: Math.floor(Math.random() * 101),
+					eloRating: Math.floor(Math.random() * 101),
+					wins: Math.floor(Math.random() * 101),
+					losses: Math.floor(Math.random() * 101)
+				};
+
+				try{
+					await account_management.createAccount(username, hash, email)
+					await account_management.updateAccountStats(username, stats);
+					dbStats = await account_management.getAccountStats(username);
+					result = (dbStats.eloRating === stats.eloRating) ? 1 :  0;
+
+					await account_management.deleteAccount(username);
+				} catch(err){
+					throw(err);
+				}
+				assert(result === 1);
+			});
+
+			it("should return rank correctly.", async () => {
+				let username, password, hash, email, stats, dbStats, result;
+				username = generateTestString();
+				password = generateTestString();
+				hash = account_validation.hashPassword(password);
+				email = generateTestString();
+
+				stats = {
+					level: Math.floor(Math.random() * 101),
+					rank: Math.floor(Math.random() * 101),
+					eloRating: Math.floor(Math.random() * 101),
+					wins: Math.floor(Math.random() * 101),
+					losses: Math.floor(Math.random() * 101)
+				};
+
+				try{
+					await account_management.createAccount(username, hash, email)
+					await account_management.updateAccountStats(username, stats);
+					dbStats = await account_management.getAccountStats(username);
+					result = (dbStats.rank === stats.rank) ? 1 :  0;
+
+					await account_management.deleteAccount(username);
+				} catch(err){
+					throw(err);
+				}
+				assert(result === 1);
+			});
+
+			it("should return level correctly.", async () => {
+				let username, password, hash, email, stats, dbStats, result;
+				username = generateTestString();
+				password = generateTestString();
+				hash = account_validation.hashPassword(password);
+				email = generateTestString();
+
+				stats = {
+					level: Math.floor(Math.random() * 101),
+					rank: Math.floor(Math.random() * 101),
+					eloRating: Math.floor(Math.random() * 101),
+					wins: Math.floor(Math.random() * 101),
+					losses: Math.floor(Math.random() * 101)
+				};
+
+				try{
+					await account_management.createAccount(username, hash, email)
+					await account_management.updateAccountStats(username, stats);
+					dbStats = await account_management.getAccountStats(username);
+					result = (dbStats.level === stats.level) ? 1 :  0;
+
+					await account_management.deleteAccount(username);
+				} catch(err){
+					throw(err);
+				}
+				assert(result === 1);
+			});
+
+			it("should return wins correctly.", async () => {
+				let username, password, hash, email, stats, dbStats, result;
+				username = generateTestString();
+				password = generateTestString();
+				hash = account_validation.hashPassword(password);
+				email = generateTestString();
+
+				stats = {
+					level: Math.floor(Math.random() * 101),
+					rank: Math.floor(Math.random() * 101),
+					eloRating: Math.floor(Math.random() * 101),
+					wins: Math.floor(Math.random() * 101),
+					losses: Math.floor(Math.random() * 101)
+				};
+
+				try{
+					await account_management.createAccount(username, hash, email)
+					await account_management.updateAccountStats(username, stats);
+					dbStats = await account_management.getAccountStats(username);
+					result = (dbStats.wins === stats.wins) ? 1 :  0;
+
+					await account_management.deleteAccount(username);
+				} catch(err){
+					throw(err);
+				}
+				assert(result === 1);
+			});
+
+			it("should return losses correctly.", async () => {
+				let username, password, hash, email, stats, dbStats, result;
+				username = generateTestString();
+				password = generateTestString();
+				hash = account_validation.hashPassword(password);
+				email = generateTestString();
+
+				stats = {
+					level: Math.floor(Math.random() * 101),
+					rank: Math.floor(Math.random() * 101),
+					eloRating: Math.floor(Math.random() * 101),
+					wins: Math.floor(Math.random() * 101),
+					losses: Math.floor(Math.random() * 101)
+				};
+
+				try{
+					await account_management.createAccount(username, hash, email)
+					await account_management.updateAccountStats(username, stats);
+					dbStats = await account_management.getAccountStats(username);
+					result = (dbStats.losses === stats.losses) ? 1 :  0;
+
+					await account_management.deleteAccount(username);
+				} catch(err){
+					throw(err);
+				}
+				assert(result === 1);
+			});
+			it("should return account credentials invalid (Invalid Username).", async () => {
+				let username, password, hash, email, stats, dbStats, statsResult, userResult;
+				username = generateTestString();
+				password = generateTestString();
+				hash = account_validation.hashPassword(password);
+				email = generateTestString();
+
+				stats = {
+					level: Math.floor(Math.random() * 101),
+					rank: Math.floor(Math.random() * 101),
+					eloRating: Math.floor(Math.random() * 101),
+					wins: Math.floor(Math.random() * 101),
+					losses: Math.floor(Math.random() * 101)
+				};
+
+				try{
+					await account_management.createAccount(username, hash, email)
+					userResult = await account_management.updateAccountStats(generateTestString(), stats);
+					dbStats = await account_management.getAccountStats(username);
+					statsResult = (dbStats.losses === stats.losses) ? 1 :  0;
+
+					await account_management.deleteAccount(username);
+				} catch(err){
+					throw(err);
+				}
+				assert(statsResult === 0 && userResult === 1);
+			});
+
 		});
 
 	}); 
