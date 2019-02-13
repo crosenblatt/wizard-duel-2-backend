@@ -1,0 +1,22 @@
+{
+  "name": "Wizard_Duel_2_Server",
+  "version": "1.0.0",
+  "description": "Wizard Duel 2 Server",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "author": "Vikas Tatineni",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "chai": "^4.2.0",
+    "email-verifier": "^0.4.1",
+    "mocha": "^5.2.0",
+    "mongodb": "^3.1.13",
+    "nodemailer": "^5.1.1"
+  }
+}
