@@ -9,11 +9,8 @@ app.get('/', (req, res) => {
 res.send('Chat Server is running on port 3000')
 });
 
-<<<<<<< HEAD
 pqueue = [];
-=======
 var roomNums = {};
->>>>>>> 22034a9bfb1a4ce2917306b1d719132d8a9ad9cb
 
 io.on('connection', (socket) => {
 
