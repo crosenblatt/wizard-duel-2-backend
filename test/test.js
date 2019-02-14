@@ -124,7 +124,7 @@ describe("Backend Tests", function() {
 				password = generateTestString();
 				hash = account_validation.hashPassword(password);
 				email = generateTestString();
-				newEmail = 'vtatinen@purdue.edu'; //CHANGE THIS TO A TESTING EMAIL IF YOU WANT
+				newEmail = 'wizardduel2@gmail.com'; //CHANGE THIS TO A TESTING EMAIL IF YOU WANT
 
 				try{
 					await account_management.createAccount(username, hash, email);
@@ -142,7 +142,7 @@ describe("Backend Tests", function() {
 				password = generateTestString();
 				hash = account_validation.hashPassword(password);
 				email = generateTestString();
-				newEmail = 'vtatinen@purdue.edu'; //CHANGE THIS TO A TESTING EMAIL IF YOU WANT
+				newEmail = 'wizardduel2@gmail.com'; //CHANGE THIS TO A TESTING EMAIL IF YOU WANT
 
 				try{
 					await account_management.createAccount(username, hash, email);
@@ -159,7 +159,7 @@ describe("Backend Tests", function() {
 				username = generateTestString();
 				password = generateTestString();
 				hash = account_validation.hashPassword(password);
-				email = 'vtatinen@purdue.edu'; //CHANGE THIS TO A TESTING EMAIL IF YOU WANT
+				email = 'wizardduel2@gmail.com'; //CHANGE THIS TO A TESTING EMAIL IF YOU WANT
 
 				try{
 					await account_management.createAccount(username, hash, email);
@@ -199,7 +199,7 @@ describe("Backend Tests", function() {
 				username = generateTestString();
 				password = generateTestString();
 				hash = account_validation.hashPassword(password);
-				email = 'vtatinen@purdue.edu'; //CHANGE THIS TO A TESTING EMAIL IF YOU WANT
+				email = 'wizardduel2@gmail.com'; //CHANGE THIS TO A TESTING EMAIL IF YOU WANT
 
 				try{
 					await account_management.createAccount(username, hash, email);
@@ -217,7 +217,7 @@ describe("Backend Tests", function() {
 				password = generateTestString();
 				hash = account_validation.hashPassword(password);
 				email = generateTestString();
-				newEmail = 'vtatinen@purdue.edu'; //CHANGE THIS TO A TESTING EMAIL IF YOU WANT
+				newEmail = 'wizardduel2@gmail.com'; //CHANGE THIS TO A TESTING EMAIL IF YOU WANT
 
 				try{
 					await account_management.createAccount(username, hash, email);
@@ -584,7 +584,7 @@ describe("Backend Tests", function() {
 				username = generateTestString();
 				password = generateTestString();
 				hash = account_validation.hashPassword(password);
-				email = 'vtatinen@purdue.edu'; //CHANGE THIS TO A TESTING EMAIL IF YOU WANT
+				email = 'wizardduel2@gmail.com'; //CHANGE THIS TO A TESTING EMAIL IF YOU WANT
 
 				try{
 					await account_management.createAccount(username, hash, email);
@@ -602,7 +602,7 @@ describe("Backend Tests", function() {
 				username = generateTestString();
 				password = generateTestString();
 				hash = account_validation.hashPassword(password);
-				newEmail = 'vtatinen@purdue.edu'; //CHANGE THIS TO A TESTING EMAIL IF YOU WANT
+				newEmail = 'wizardduel2@gmail.com'; //CHANGE THIS TO A TESTING EMAIL IF YOU WANT
 
 				try{
 					await account_management.createAccount(username, hash, email);
@@ -619,7 +619,7 @@ describe("Backend Tests", function() {
 				username = generateTestString();
 				password = generateTestString();
 				hash = account_validation.hashPassword(password);
-				newEmail = 'vtatinen@purdue.edu'; //CHANGE THIS TO A TESTING EMAIL IF YOU WANT
+				newEmail = 'wizardduel2@gmail.com'; //CHANGE THIS TO A TESTING EMAIL IF YOU WANT
 
 				try{
 					await account_management.createAccount(username, hash, email);

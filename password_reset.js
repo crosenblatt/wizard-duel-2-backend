@@ -68,16 +68,16 @@ const sendPasswordEmail = async function(username, accountEmail) {
 
 	// Transporter that sends the email from a mail server
 	let transporter = nodemailer.createTransport({
-		service: 'outlook', // Don't want to make our own mail server, so using another mail service
+		service: 'gmail', // Don't want to make our own mail server, so using another mail service
 		auth: {
-			user: ' ', /* INSERT EMAIL HERE */
-			pass: ' ' /* INSERT EMAIL PASSWORD HERE */
+			user: 'wizardduel2@gmail.com', /* INSERT EMAIL HERE */
+			pass: 'AlAgier0KL' /* INSERT EMAIL PASSWORD HERE */
 		}
 	});
 
 	// Object that holds email content
 	let mailOptions = {
-		from: ' ', /* INSERT EMAIL HERE */
+		from: 'wizardduel2@gmail.com', /* INSERT EMAIL HERE */
 		to: accountEmail,
 		subject: 'Wizard Duel 2 - Password Reset',
 		text: 'Your Temporary Password is ' + tempPassword + '.'
