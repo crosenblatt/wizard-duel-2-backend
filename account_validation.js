@@ -78,10 +78,9 @@ const validateCreationCredentials = async function(username, email) {
 	if (validUsername === -1 || validUsername === 1){return validUsername;}
 
 	let realEmail = await verifyUserEmail(email);
-
 	if (realEmail === -1 || realEmail === 0) {return 2;}
 
-	let validEmail = await account_management.accountEmailExists(email)
+	let validEmail = await account_management.accountEmailExists(email);
 	if (validEmail === -1) {return validEmail;}
 	if (validEmail === 1) {return 2;}
 
@@ -127,7 +126,7 @@ const verifyUserEmail = async function(email) {
 		return -1;
 	}
 
-	if(data.formatCheck === 'true' && data.smtpCheck === 'true' && data.dnsCheck === 'true' && data.disposableCheck === 'false') {return 1;}
+	if(data.formatCheck === 'true' /*&& data.smtpCheck === 'true'*/ && data.dnsCheck === 'true' && data.disposableCheck === 'false') {return 1;}
 
 	return 0;
 

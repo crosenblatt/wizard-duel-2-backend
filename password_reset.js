@@ -52,7 +52,7 @@ async function updateAccountInfo(username, tempPassword) {
  * @param {String} username 	The username of the account having its password reset
  * @param {String} accountEmail The email of the user who is reseting password
  *
- * @return {int} Returns a value depending on if email sent or invalid information (0 = Valid, 1 = Invalid Username, 2 = Invalid Email)
+ * @return {int} Returns a value depending on if email sent or invalid information (-1 = Error sending email, 0 = Valid, 1 = Invalid Username, 2 = Invalid Email)
  */
 const sendPasswordEmail = async function(username, accountEmail) {
 
@@ -70,33 +70,40 @@ const sendPasswordEmail = async function(username, accountEmail) {
 	let transporter = nodemailer.createTransport({
 		service: 'outlook', // Don't want to make our own mail server, so using another mail service
 		auth: {
-			user: '', /* INSERT EMAIL HERE */
-			pass: '' /* INSERT EMAIL PASSWORD HERE */
+			user: ' ', /* INSERT EMAIL HERE */
+			pass: ' ' /* INSERT EMAIL PASSWORD HERE */
 		}
 	});
 
 	// Object that holds email content
 	let mailOptions = {
-		from: '', /* INSERT EMAIL HERE */
+		from: ' ', /* INSERT EMAIL HERE */
 		to: accountEmail,
 		subject: 'Wizard Duel 2 - Password Reset',
 		text: 'Your Temporary Password is ' + tempPassword + '.'
 	};
 
 	// Function that sends mail from Wizard Duel 2 Support to the user
-	transporter.sendMail(mailOptions, function(error, info){
-		// Output for internal manual testing to see if email was sent
-		if (error) {
-			console.log(error);
-			throw error;
-		} else {
-			console.log('Email send: ' + info.response);
-		}
-	});
+	try{
+		transporter.sendMail(mailOptions, function(error, info){
+			// Output for internal manual testing to see if email was sent
+			if (error) {
+				console.log(error);
+				throw error;
+			} else {
+				//console.log('Email send: ' + info.response);
+			}
+		});
+	} catch(error) {
+		return -1;
+	}
+
 	return 0;
 }
 
 // Exports Relevant Function so main part of the server can use.
 module.exports = {
-	sendPasswordEmail: sendPasswordEmail
+	sendPasswordEmail: sendPasswordEmail,
+	generateTempPassword: generateTempPassword,
+	updateAccountInfo:updateAccountInfo
 };

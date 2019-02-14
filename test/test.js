@@ -2,6 +2,7 @@
 
 const account_management = require('../account_management.js');
 const account_validation = require('../account_validation.js');
+const password_reset = require('../password_reset.js');
 
 const crypto = require('crypto'); 	
 const assert = require('assert');
@@ -39,21 +40,19 @@ describe("Backend Tests", function() {
 			//Reseting Time to be a little slower since salting and hashing takes a second
 			this.slow(2000);
 
-			it("should return that password does not match the hash.", (done) => {
+			it("should return that password does not match the hash.", function() {
 				let hash, originalString;
 				originalString = generateTestString();
 				hash = account_validation.hashPassword(originalString);
 				originalString = generateTestString();
 				assert(!(account_validation.checkPassword(originalString, hash)));
-				done();
 			});
 
-			it("should return that password matches the hash.", (done) => {
+			it("should return that password matches the hash.", function() {
 				let hash, originalString;
 				originalString = generateTestString();
 				hash = account_validation.hashPassword(originalString);
 				assert(account_validation.checkPassword(originalString, hash));
-				done();
 			});
 		});
 
@@ -78,7 +77,6 @@ describe("Backend Tests", function() {
 				assert(result === 1);
 			});
 
-		
 			it("should return login credentials invalid (Invalid Password).", async () => {
 				let username, password, hash, email, result;
 				username = generateTestString();
@@ -95,8 +93,7 @@ describe("Backend Tests", function() {
 				}
 				assert(result === 1);
 			});
-
-		
+	
 			it("should return login credentials valid.", async () => {
 				let username, password, hash, email, result;
 				username = generateTestString();
@@ -119,7 +116,7 @@ describe("Backend Tests", function() {
 			//Takes a second to communicate with the database
 			this.slow(3000);
 			//Email verification API is super slow. May need to change later. Increased Timeout to compensate.
-			this.timeout(4000);
+			this.timeout(10000);
 
 			it("should return creation credentials valid.", async () => {
 				let username, password, hash, email, newEmail, result;
@@ -191,6 +188,45 @@ describe("Backend Tests", function() {
 				}
 
 				assert(result === 2);
+			});
+		});
+
+		describe('#validateUserAccountEmail', function () {
+			this.slow(3000);
+
+			it("should return email credentials valid.", async () => {
+				let username, password, hash, email, result;
+				username = generateTestString();
+				password = generateTestString();
+				hash = account_validation.hashPassword(password);
+				email = 'vtatinen@purdue.edu'; //CHANGE THIS TO A TESTING EMAIL IF YOU WANT
+
+				try{
+					await account_management.createAccount(username, hash, email);
+					result = await account_validation.validateUserAccountEmail(username, email);
+					await account_management.deleteAccount(username);
+				} catch(err){
+					throw(err);
+				}
+				assert(result === 0);
+			});
+
+			it("should return email credentials invalid (Account Not Associated With Email).", async () => {
+				let username, password, hash, email, newEmail, result;
+				username = generateTestString();
+				password = generateTestString();
+				hash = account_validation.hashPassword(password);
+				email = generateTestString();
+				newEmail = 'vtatinen@purdue.edu'; //CHANGE THIS TO A TESTING EMAIL IF YOU WANT
+
+				try{
+					await account_management.createAccount(username, hash, email);
+					result = await account_validation.validateUserAccountEmail(username, newEmail);
+					await account_management.deleteAccount(username);
+				} catch(err){
+					throw(err);
+				}
+				assert(result === 1);
 			});
 		});
 
@@ -297,7 +333,6 @@ describe("Backend Tests", function() {
 				}
 				assert(result === 1);
 			});
-
 
 			it("should return that password was not changed (Invalid Username).", async () => {
 				let username, password, hash, newUsername, email, result, passwordCheck;
@@ -464,6 +499,7 @@ describe("Backend Tests", function() {
 				}
 				assert(result === 1);
 			});
+
 			it("should return account credentials invalid (Invalid Username).", async () => {
 				let username, password, hash, email, stats, dbStats, statsResult, userResult;
 				username = generateTestString();
@@ -494,6 +530,107 @@ describe("Backend Tests", function() {
 
 		});
 
+	});
+
+	// Password Reset System Tests -> MAKE SURE TO HAVE TRANSPORTER CORRECTLY SET IN 'password_reset.js'
+	describe("password_reset", function(){
+		
+		describe("#generateTempPassword()", function (){
+			// JUST CHECKS IF 100 STRINGS ARE MATCHING -> Probably should implement chi square testing
+			it("should return that all randomly generated passwords are unique.", function (){
+				let hash = {};
+				for(let i = 0; i < 100; i++) {
+					if(hash[password_reset.generateTempPassword()] === true){
+						assert(false);
+						break;
+					} else {
+						hash[password_reset.generateTempPassword()] = true;
+					}
+				}
+				assert(true);
+			});
+		});
+
+		describe("#updateAccountInfo()", function (){
+			// Takes a second to connect to the database
+			this.slow(3000);
+
+			it("should return that password was successfully changed.", async () => {
+				let username, password, hash, newPassword, email, updateSuccess, result;
+				username = generateTestString();
+				password = generateTestString();
+				hash = account_validation.hashPassword(password);
+				newPassword = password_reset.generateTempPassword();
+				email = generateTestString();
+
+				try{
+					await account_management.createAccount(username, hash, email);
+					updateSuccess = await password_reset.updateAccountInfo(username, newPassword);
+					result = (account_validation.checkPassword(newPassword, await account_management.getAccountPassword(username))) ? 1 : 0;
+					await account_management.deleteAccount(username);
+				} catch(err){
+					throw(err);
+				}
+				assert(result === 1 && updateSuccess === 0);
+			});
+		});
+
+		describe('#sendPasswordEmail()', function () {
+		    // Takes a second to connect to the database and send an email
+			this.slow(10000);
+
+			it("should return that password email was sent successfully.", async () => {
+				let username, password, hash, email, result;
+				username = generateTestString();
+				password = generateTestString();
+				hash = account_validation.hashPassword(password);
+				email = 'vtatinen@purdue.edu'; //CHANGE THIS TO A TESTING EMAIL IF YOU WANT
+
+				try{
+					await account_management.createAccount(username, hash, email);
+					result = await password_reset.sendPasswordEmail(username, email);
+					await account_management.deleteAccount(username);
+				} catch(err){
+					throw(err);
+				}
+
+				assert(result === 0);
+			});
+
+			it("should return that password email was not sent successfully (Invalid Username).", async () => {
+				let username, password, hash, email, result;
+				username = generateTestString();
+				password = generateTestString();
+				hash = account_validation.hashPassword(password);
+				newEmail = 'vtatinen@purdue.edu'; //CHANGE THIS TO A TESTING EMAIL IF YOU WANT
+
+				try{
+					await account_management.createAccount(username, hash, email);
+					result = await password_reset.sendPasswordEmail(generateTestString(), email);
+					await account_management.deleteAccount(username);
+				} catch(err){
+					throw(err);
+				}
+				assert(result === 1);
+			});
+
+			it("should return that password email was not sent successfully (Invalid Email).", async () => {
+				let username, password, hash, email, result;
+				username = generateTestString();
+				password = generateTestString();
+				hash = account_validation.hashPassword(password);
+				newEmail = 'vtatinen@purdue.edu'; //CHANGE THIS TO A TESTING EMAIL IF YOU WANT
+
+				try{
+					await account_management.createAccount(username, hash, email);
+					result = await password_reset.sendPasswordEmail(username, generateTestString());
+					await account_management.deleteAccount(username);
+				} catch(err){
+					throw(err);
+				}
+				assert(result === 1);
+			});
+		});
 	}); 
 });
 
