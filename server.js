@@ -77,6 +77,7 @@ io.on('connection', (socket) => {
     socket.on('disconnect', function(room) {
         console.log("goodbye");
         roomNums[room] --;
+        console.log("room " + room + " contains " + roomNums[room] + " people");
     })
 
 })
