@@ -23,8 +23,6 @@ io.on('connection', (socket) => {
         let name = Player.generateName();
         let score = Player.getRandomInt(0, 100000)
         var p = new Player(name, score)
-
-
         pqueue.push(p);
     
     });
@@ -41,6 +39,7 @@ io.on('connection', (socket) => {
         If there are already two people in the room, the server rejects the request
         to join
         */
+       
         var numInRoom = 0;
         if (roomNums[room] == null) {
             roomNums[room] = 1;
@@ -48,6 +47,7 @@ io.on('connection', (socket) => {
             numInRoom = roomNums[room];
             if(numInRoom == 2) {
                 console.log("rejected");
+                socket.emit("rejected");
                 return;
             }
             roomNums[room] ++;
@@ -57,6 +57,8 @@ io.on('connection', (socket) => {
         console.log("accepted");
         socket.join(room);
         console.log("user has joined room: " + room);
+
+        //console.log("rooms: " + Object.values(socket.rooms));
     })
 
     /*
@@ -73,11 +75,21 @@ io.on('connection', (socket) => {
 
         });
 
-    /*disconnect: Self explanatory, used when a user exits a room */
-    socket.on('disconnect', function(room) {
-        console.log("goodbye");
+    /*
+    remove a user from a room
+    called when a game ends
+    */
+    socket.on('leave', function(room) {
+        console.log("game over, leaving room");
+        socket.leave(room);
         roomNums[room] --;
         console.log("room " + room + " contains " + roomNums[room] + " people");
+    })
+
+    /*disconnect: Self explanatory, used when a user exits a room */
+    socket.on('disconnect', function() {
+        
+        console.log("disconnecting from server"); 
     })
 
 })
