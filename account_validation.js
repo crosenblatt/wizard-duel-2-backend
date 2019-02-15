@@ -36,6 +36,7 @@ const checkPassword = function(password, hash) {
  * @return {int} Returns a value depending on if email address valid or invalid information (-1 = Cannot connect to database, 0 = Valid, 1 = Invalid Account) 
  */
 const validateUserAccountEmail = async function(username, accountEmail) {
+
 	let valid = await account_management.getAccountEmail(username);
 
 	if (valid === accountEmail) {return 0;}
@@ -74,6 +75,7 @@ const validateLoginCredentials = async function(username, password) {
  * @return {int} Returns a value depending on if account creation credentials are valid (-1 = Cannot connect to database, 0 = Valid, 1 = Invalid username, 2 = Invalid email) 
  */
 const validateCreationCredentials = async function(username, email) {
+
 	let validUsername = await account_management.userAccountExists(username);
 	if (validUsername === -1 || validUsername === 1){return validUsername;}
 

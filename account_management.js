@@ -62,16 +62,16 @@ const createAccount = async function(usrname, pass, mail) {
 	//Possibly create variable to hold cursor so we can close it after we finish with it.
 
 	const user = {
-		username: usrname,
-		password: pass,
-		email: mail,
-		title: TITLE.NONE,
-		level: 1,
-		rank: -1,
-		eloRating: -1,
-		wins: 0,
-		losses: 0,
-		spellbook: [-1 , -1 , -1 , -1 ,-1]
+		"username": usrname,
+		"password": pass,
+		"email": mail,
+		"title": TITLE.NONE,
+		"level": 1,
+		"rank": -1,
+		"eloRating": -1,
+		"wins": 0,
+		"losses": 0,
+		"spellbook": [-1 , -1 , -1 , -1 ,-1]
 	};
 
 	let userExists, emailExists;

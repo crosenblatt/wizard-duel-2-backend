@@ -9,7 +9,7 @@
   "scripts": {
     "test": "mocha"
   },
-  "author": "Vikas Tatineni",
+  "author": "Wizard Duel 2 Team",
   "license": "ISC",
   "dependencies": {
     "bcryptjs": "^2.4.3",
@@ -17,6 +17,8 @@
     "email-verifier": "^0.4.1",
     "mocha": "^5.2.0",
     "mongodb": "^3.1.13",
-    "nodemailer": "^5.1.1"
+    "nodemailer": "^5.1.1",
+    "express": "^4.16.4",
+    "socket.io": "^2.2.0"
   }
 }
