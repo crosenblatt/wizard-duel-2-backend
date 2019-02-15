@@ -26,6 +26,11 @@ class Player {
         return name;
     
     }
+    
+    static generateRoomName(){
+      let r = Math.random().toString(36).substring(7);
+      return r
+    }
 
 
   }

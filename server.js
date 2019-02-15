@@ -1,4 +1,5 @@
 const Player = require('./player.js').default
+const Queue = require('./queue.js').defualt
 const express = require('express'),
 http = require('http'),
 app = express(),
@@ -9,7 +10,7 @@ app.get('/', (req, res) => {
 res.send('Chat Server is running on port 3000')
 });
 
-pqueue = [];
+var pqueue = new Queue();
 var roomNums = {};
 
 io.on('connection', (socket) => {
@@ -23,7 +24,11 @@ io.on('connection', (socket) => {
         let name = Player.generateName();
         let score = Player.getRandomInt(0, 100000)
         var p = new Player(name, score)
-        pqueue.push(p);
+        pqueue.enqueue(p);
+        
+        while(1){
+
+        }
     
     });
 
