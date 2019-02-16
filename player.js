@@ -5,7 +5,7 @@ class Player {
       this.mana = 100;
       this.spellbook = [-1,-1,-1,-1,-1];
       this.elo = elo;
-      this.matched = false;
+      this.room = "-1"
     }
 
 
@@ -27,13 +27,11 @@ class Player {
     
     }
     
-    static generateRoomName(){
-      let r = Math.random().toString(36).substring(7);
-      return r
-    }
+  
 
 
   }
+
 
 module.exports = Player;
 

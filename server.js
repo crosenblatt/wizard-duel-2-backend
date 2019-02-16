@@ -1,5 +1,6 @@
-const Player = require('./player.js').default
-const Queue = require('./queue.js').defualt
+const Room = require('./room.js')
+const Player = require('./player.js')
+//const Queue = require('./queue.js').default
 const express = require('express'),
 http = require('http'),
 app = express(),
@@ -10,8 +11,12 @@ app.get('/', (req, res) => {
 res.send('Chat Server is running on port 3000')
 });
 
-var pqueue = new Queue();
 var roomNums = {};
+var rooms = [];
+// Create 10 empty rooms for now
+for(var i = 0; i < 10; i++){
+    rooms.push(new Room());
+}
 
 io.on('connection', (socket) => {
 
@@ -21,14 +26,27 @@ io.on('connection', (socket) => {
     Enqueue: Adds player to list of queued players 
     */
     socket.on('enqueue', (player) => {
+        // Generate random info for now
         let name = Player.generateName();
         let score = Player.getRandomInt(0, 100000)
         var p = new Player(name, score)
-        pqueue.enqueue(p);
         
-        while(1){
+        // Find first open room and place player in it
+        do {
+            for(var r in rooms){
+                if(r.getSize() < 2){
+                    p.room = r.name;
+                    r.addPlayer(p);
+                    break;
+                }
+            }
+        } while(p.room == "-1");
 
-        }
+        // Wait until another player gets placed in the room
+        while(p.room.getSize() < 2){}
+
+        // emit back player object with room code attached
+        socket.emit(JSON.stringify(p));
     
     });
 
