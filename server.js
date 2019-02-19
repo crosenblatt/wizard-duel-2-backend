@@ -91,8 +91,8 @@ io.on('connection', (socket) => {
 
 
   socket.on('createAccount', async function(username, password, email){
-	console.log(username + " " + password + " " + email);
-	let result = {"valid": -1};
+	//console.log(username + " " + password + " " + email);
+	let result = {"valid": -1}; // -1 - Can't Connect to Database, 0 = valid, 1 = invalid username, 2 = invalid email
 
 	result.valid = await account_validation.validateCreationCredentials(username, email);
 	console.log(result.valid);
@@ -100,26 +100,39 @@ io.on('connection', (socket) => {
 	socket.emit('accountCreated', result);
   });
 
+  
   socket.on('loginAccount', async function(username, password){
 	console.log(username + " " + password);
 	let result = { 
 		"valid": -1,
-		"userInfo": NULL
+		"userInfo": {}
 	};
-
-	result.valid = await account_validation.validateLoginCredentials(username, password);
-
-	if(result.valid === 0){
-		result.userInfo = await account_management.getAccountInfo(username);
-	}
+    result.valid = await account_validation.validateLoginCredentials(username, password);
+    console.log(result.valid);
+    if(result.valid === 0) {
+    	await account_management.updateAccountStatus(username, true);
+    	let info = await account_management.getAccountInfo(username);
+    	//console.log(test);
+    	result.userInfo = info;
+    }
 	socket.emit('login', result);
   });
 
   socket.on('getUserStats', async function(username){
 	console.log(username);
-	let result = {"valid": -1 };
-	result.valid = await account_management.getAccountStats(username);
+	let result = {
+		"valid": -1,
+		"userStats": {}
+    };
 
+	let stats = await account_management.getAccountStats(username);
+	if(stats === -1 || stats === 1) {
+		result.valid = stats;
+	} else {
+		result.valid = 0;
+		result.userStats = stats;
+	}
+		
 	socket.emit('statsValid', result);
   });
 

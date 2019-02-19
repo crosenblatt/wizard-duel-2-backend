@@ -50,7 +50,7 @@ const validateUserAccountEmail = async function(username, accountEmail) {
  * @param {String} username  The username of the account
  * @param {String} password  The password of the account (NOT HASHED)
  *
- * @return {int} Returns a value depending on if login credentials are valid (-1 = Cannot connect to database, 0 = Valid, 1 = Invalid Account Info) 
+ * @return {int} Returns a value depending on if login credentials are valid (-1 = Cannot connect to database, 0 = Valid, 1 = Invalid Account Info, 2 = User is online already) 
  */
 const validateLoginCredentials = async function(username, password) {
 	let validUsername = await account_management.userAccountExists(username);
@@ -60,6 +60,10 @@ const validateLoginCredentials = async function(username, password) {
 	let hash = await account_management.getAccountPassword(username);
 	let validPass = checkPassword(password, hash);
 	if (validPass === false) {return 1;}
+
+    let validStatus = await account_management.getAccountStatus(username);
+    if (validStatus === true) {return 2;}
+    if (validStatus === -1) {return validStatus;}
 
 	return 0;
 
