@@ -1,3 +1,5 @@
+const Player = require('./player.js')
+
 class Room {
     
     constructor(){

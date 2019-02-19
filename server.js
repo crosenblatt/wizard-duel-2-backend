@@ -1,6 +1,7 @@
 const Room = require('./room.js')
 const Player = require('./player.js')
 //const Queue = require('./queue.js').default
+var waitUntil = require('wait-until')
 const express = require('express'),
 http = require('http'),
 app = express(),
@@ -25,28 +26,31 @@ io.on('connection', (socket) => {
     /*
     Enqueue: Adds player to list of queued players 
     */
-    socket.on('enqueue', (player) => {
+    socket.on('enqueue', (name, score) => {
         // Generate random info for now
-        let name = Player.generateName();
-        let score = Player.getRandomInt(0, 100000)
         var p = new Player(name, score)
+        console.log(name + " ennqueued")
         
         // Find first open room and place player in it
+        var found = false;
         do {
-            for(var r in rooms){
-                if(r.getSize() < 2){
-                    p.room = r.name;
-                    r.addPlayer(p);
-                    break;
+            rooms.forEach(function(room) {
+                if(room.size < 2 && !found) {
+                    p.room = room.name;
+                    room.addPlayer(p);
+                    found = true;
                 }
-            }
-        } while(p.room == "-1");
+            })
+            console.log(name + " searching...");
+        } while(!found);
+        
+        console.log(name + " found: room " + p.room)
+        var room = { 
+                     "room" : p.room
+                    };
 
-        // Wait until another player gets placed in the room
-        while(p.room.getSize() < 2){}
-
-        // emit back player object with room code attached
-        socket.emit(JSON.stringify(p));
+        console.log(room)
+        socket.emit("room", room); 
     
     });
 
@@ -56,31 +60,40 @@ io.on('connection', (socket) => {
     There should be at most two users per room at any time
     */
 
-    socket.on('join', function(room) {
+    socket.on('join', function(room, name, health, mana, spells) {
 
         /*
         If there are already two people in the room, the server rejects the request
         to join
         */
-       
-        var numInRoom = 0;
-        if (roomNums[room] == null) {
-            roomNums[room] = 1;
-        } else {
-            numInRoom = roomNums[room];
-            if(numInRoom == 2) {
-                console.log("rejected");
-                socket.emit("rejected");
-                return;
-            }
-            roomNums[room] ++;
-        }
 
         console.log("room " + room + " contains " + roomNums[room] + " people")
         console.log("accepted");
         socket.join(room);
         console.log("user has joined room: " + room);
+        
+        var newuser = {
+                        "name" : name,
+                        "health" : health,
+                        "mana" : mana,
+                        "spells" : spells,
+                    }
 
+        rooms.forEach(function(r) {
+            if(r.size == 2 && r.name == room) {
+                var user = {
+                    "name" : r.players[0].name,
+                    "health" : r.players[0].health,
+                    "mana" : r.players[0].mana,
+                    "spells" : r.players[0].spells
+                }
+                
+                console.log("getting existing user: " + r.players[0].name)
+                socket.emit("getuser", user)
+                return;
+            }
+        })
+        socket.broadcast.to(room).emit("newuserjoined", newuser)
         //console.log("rooms: " + Object.values(socket.rooms));
     })
 
@@ -111,7 +124,9 @@ io.on('connection', (socket) => {
 
     /*disconnect: Self explanatory, used when a user exits a room */
     socket.on('disconnect', function() {
-        
+        rooms.forEach(function(room) {
+            room.clearRoom()
+        })
         console.log("disconnecting from server"); 
     })
 
