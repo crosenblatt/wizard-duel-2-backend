@@ -12,7 +12,6 @@ app.get('/', (req, res) => {
 res.send('Chat Server is running on port 3000')
 });
 
-var roomNums = {};
 var rooms = [];
 // Create 10 empty rooms for now
 for(var i = 0; i < 10; i++){
@@ -66,8 +65,6 @@ io.on('connection', (socket) => {
         If there are already two people in the room, the server rejects the request
         to join
         */
-
-        console.log("room " + room + " contains " + roomNums[room] + " people")
         console.log("accepted");
         socket.join(room);
         console.log("user has joined room: " + room);
@@ -118,15 +115,10 @@ io.on('connection', (socket) => {
     socket.on('leave', function(room) {
         console.log("game over, leaving room");
         socket.leave(room);
-        roomNums[room] --;
-        console.log("room " + room + " contains " + roomNums[room] + " people");
     })
 
     /*disconnect: Self explanatory, used when a user exits a room */
     socket.on('disconnect', function() {
-        rooms.forEach(function(room) {
-            room.clearRoom()
-        })
         console.log("disconnecting from server"); 
     })
 
