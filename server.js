@@ -33,8 +33,42 @@ io.on('connection', (socket) => {
         
         // Find first open room and place player in it
         var found = false;
-        do {
+
+        // First check for rooms w/ 1 player and match by ELO up to certain threshold
+        eloRange = 5;
+        while(eloRange < 50 && !found){
+
             rooms.forEach(function(room) {
+                if(room.size == 1){
+                    if(Math.abs(score - room.players[0].elo) < eloRange){
+                        found = true;
+                        p.room = room.name;
+                        room.addPlayer()
+                        break;
+                    }
+                }
+            })
+
+            if(!found){
+                console.log(name + " searching...");
+                eloRange += 5;
+                continue;
+            }
+            else{
+                console.log(name + " found room " + p.room);
+                var room = { "room" : p.room };
+                    socket.emit("room", room); 
+                    break;
+            }
+        } //endwhile
+            
+
+
+
+
+        // If no rooms w/ players found just enter first available room. 
+        while(!found){   
+        rooms.forEach(function(room) {
                 if(room.size < 2 && !found) {
                     p.room = room.name;
                     room.addPlayer(p);
@@ -42,7 +76,7 @@ io.on('connection', (socket) => {
                 }
             })
             console.log(name + " searching...");
-        } while(!found);
+        } 
         
         console.log(name + " found: room " + p.room)
         var room = { 
