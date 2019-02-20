@@ -16,6 +16,7 @@ var rooms = [];
 // Create 10 empty rooms for now
 for(var i = 0; i < 10; i++){
     rooms.push(new Room());
+    //rooms[i].addPlayer(new Player("test" + i, (i * 50) + 100))
 }
 
 io.on('connection', (socket) => {
@@ -43,7 +44,7 @@ io.on('connection', (socket) => {
                         found = true;
                         p.room = room.name;
                         room.addPlayer()
-                        break;
+                        //break;
                     }
                 }
             })
@@ -79,7 +80,7 @@ io.on('connection', (socket) => {
         
         console.log(name + " found: room " + p.room)
         var room = { 
-                     "room" : p.room
+                     "room" : p.room,
                     };
 
         console.log(room)
