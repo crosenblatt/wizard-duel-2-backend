@@ -62,16 +62,17 @@ const createAccount = async function(usrname, pass, mail) {
 	//Possibly create variable to hold cursor so we can close it after we finish with it.
 
 	const user = {
-		username: usrname,
-		password: pass,
-		email: mail,
-		title: TITLE.NONE,
-		level: 1,
-		rank: -1,
-		eloRating: -1,
-		wins: 0,
-		losses: 0,
-		spellbook: [-1 , -1 , -1 , -1 ,-1]
+		"username": usrname,
+		"password": pass,
+		"online": false,
+		"email": mail,
+		"title": TITLE.NONE,
+		"level": 1,
+		"rank": -1,
+		"eloRating": -1,
+		"wins": 0,
+		"losses": 0,
+		"spellbook": [-1 , -1 , -1 , -1 ,-1]
 	};
 
 	let userExists, emailExists;
@@ -247,6 +248,66 @@ const updateAccountStats = async function(usrname, stats) {
 
 
 /*
+ * Summary. Function that updates if the user is online.
+ *
+ * @param {String} usrname 	The username of the account which the status is being updated
+ * @param {Object} status   The updated status of the user account
+ *
+ * @return {int} Returns a value depending on invalid information (-1 = Cannot connect to database, 0 = valid, 1 = Invalid Username) 
+ */
+const updateAccountStatus = async function(usrname, status) {
+	let userExists;
+	try {
+
+		//userExists = await db.collection('User Accounts').find({username: usrname}).limit(1).count(true);
+		userExists = await userAccountExists(usrname);
+		if(userExists === -1){return -1;}	
+
+		if (userExists) {
+			await db.collection('User Accounts').updateOne({username: usrname}, {$set: {online: status}});
+		}
+
+	} catch (err) {
+		console.log(err.stack);
+		return -1;
+	}
+
+	if (!userExists) {return 1;}
+	else {return 0;} 
+}
+
+
+/*
+ * Summary. Function that gets an account's email
+ *
+ * @param {String} usrname  The username of the account which the email is being extracted
+ *
+ * @return {int} 	Returns a value depending on invalid information (-1 = Cannot connect to database, 1 = Invalid Username)
+ * @return {String} Returns a string of the account's email
+ */
+const getAccountStatus = async function(usrname) {
+	let userExists, status;
+	try {
+
+		//userExists = await db.collection('User Accounts').find({username: usrname}).limit(1).count(true);
+		userExists = await userAccountExists(usrname);
+		if(userExists === -1){return -1;}		
+
+		if (userExists) {
+			status = await db.collection('User Accounts').findOne({username: usrname}, {projection: {online: true, _id: false}});
+		}
+
+	} catch (err) {
+		console.log(err.stack);
+		return -1;
+	}
+
+	if (!userExists) {return 1;}
+	else {return status.online;} 
+}
+
+
+/*
  * Summary. Function that gets an account's email
  *
  * @param {String} usrname  The username of the account which the email is being extracted
@@ -389,6 +450,8 @@ module.exports = {
 	updatePassword: updatePassword,
 	getAccountStats: getAccountStats,
 	updateAccountStats: updateAccountStats,
+	getAccountStatus:getAccountStatus,
+	updateAccountStatus: updateAccountStatus,
 	getAccountEmail: getAccountEmail,
 	getAccountInfo: getAccountInfo,
 	updateAccountTitle: updateAccountTitle,

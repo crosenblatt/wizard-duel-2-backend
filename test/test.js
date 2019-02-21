@@ -93,6 +93,24 @@ describe("Backend Tests", function() {
 				}
 				assert(result === 1);
 			});
+
+			it("should return login credentials invalid (User already online).", async () => {
+				let username, password, hash, email, result;
+				username = generateTestString();
+				password = generateTestString();
+				hash = account_validation.hashPassword(password);
+				email = generateTestString();
+
+				try{
+					await account_management.createAccount(username, hash, email);
+					await account_management.updateAccountStatus(username, true);
+					result = await account_validation.validateLoginCredentials(username, password);
+					await account_management.deleteAccount(username);
+				} catch(err){
+					throw(err);
+				}
+				assert(result === 2);
+			});
 	
 			it("should return login credentials valid.", async () => {
 				let username, password, hash, email, result;
