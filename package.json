@@ -2,7 +2,7 @@
   "name": "Wizard_Duel_2_Server",
   "version": "1.0.0",
   "description": "Wizard Duel 2 Server",
-  "main": "index.js",
+  "main": "server.js",
   "directories": {
     "test": "test"
   },
@@ -19,6 +19,8 @@
     "mongodb": "^3.1.13",
     "nodemailer": "^5.1.1",
     "express": "^4.16.4",
-    "socket.io": "^2.2.0"
+    "socket.io": "^2.2.0",
+    "wait-until": "0.0.2",
+    "npm": "^6.8.0"
   }
 }

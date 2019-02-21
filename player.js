@@ -5,7 +5,7 @@ class Player {
       this.mana = 100;
       this.spellbook = [-1,-1,-1,-1,-1];
       this.elo = elo;
-      this.matched = false;
+      this.room = "-1"
     }
 
 
@@ -26,12 +26,11 @@ class Player {
         return name;
     
     }
+    
+  
 
 
   }
 
+
 module.exports = Player;
-
-
-
-
