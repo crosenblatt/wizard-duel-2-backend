@@ -59,7 +59,7 @@ describe("Backend Tests", function() {
 		describe('#validateLoginCredentials', function() {
 
 			// Takes a second to communicate with the database
-			this.slow(3000);
+			this.slow(15000);
 			it("should return login credentials invalid (Invalid Username).", async () => {
 				let username, password, hash, email, result;
 				username = generateTestString();
@@ -132,7 +132,7 @@ describe("Backend Tests", function() {
 
 		describe('#validateCreationCredentials', function() {
 			//Takes a second to communicate with the database
-			this.slow(3000);
+			this.slow(15000);
 			//Email verification API is super slow. May need to change later. Increased Timeout to compensate.
 			this.timeout(10000);
 
@@ -210,7 +210,7 @@ describe("Backend Tests", function() {
 		});
 
 		describe('#validateUserAccountEmail', function () {
-			this.slow(3000);
+			this.slow(15000);
 
 			it("should return email credentials valid.", async () => {
 				let username, password, hash, email, result;
@@ -255,7 +255,7 @@ describe("Backend Tests", function() {
 		describe("#createAccount()", function() {
 			
 			//Takes a second to communicate with the database
-			this.slow(3000);
+			this.slow(15000);
 
 			it("should return that account was successfully created.", async () => {
 				let username, password, hash, email, userCheck, passwordCheck, emailCheck;
@@ -330,7 +330,7 @@ describe("Backend Tests", function() {
 		describe("#updatePassword()", function() {
 			
 			//Reseting Time to be a little slower since salting and hashing takes a second
-			this.slow(3000);
+			this.slow(15000);
 
 			it("should return that password was successfully changed.", async () => {
 				let username, password, hash, newPassword, newHash, email, result;
@@ -377,7 +377,7 @@ describe("Backend Tests", function() {
 
 		describe("#getAccountStats()", function () {
 			//Takes a second to communicate with the database
-			this.slow(3000);
+			this.slow(15000);
 			it("should return ELO correctly.", async () => {
 				let username, password, hash, email, stats, dbStats, result;
 				username = generateTestString();
@@ -571,7 +571,7 @@ describe("Backend Tests", function() {
 
 		describe("#updateAccountInfo()", function (){
 			// Takes a second to connect to the database
-			this.slow(3000);
+			this.slow(15000);
 
 			it("should return that password was successfully changed.", async () => {
 				let username, password, hash, newPassword, email, updateSuccess, result;
@@ -595,7 +595,7 @@ describe("Backend Tests", function() {
 
 		describe('#sendPasswordEmail()', function () {
 		    // Takes a second to connect to the database and send an email
-			this.slow(10000);
+			this.slow(15000);
 
 			it("should return that password email was sent successfully.", async () => {
 				let username, password, hash, email, result;

@@ -25,7 +25,7 @@ var rooms = [];
 // Create 10 empty rooms for now
 for(var i = 0; i < 10; i++){
     rooms.push(new Room());
-    //rooms[i].addPlayer(new Player("test" + i, (i * 50) + 100))
+    rooms[i].addPlayer(new Player("test" + i, (i * 50) + 100))
 }
 
 io.on('connection', (socket) => {
@@ -210,28 +210,26 @@ io.on('connection', (socket) => {
 	socket.emit('passwordReset', result);
   });
 
+/*
+remove a user from a room
+called when a game ends
+*/
+socket.on('leave', function(room) {
+    console.log("game over, leaving room");
+    socket.leave(room);
+})
+
+/*disconnect: Self explanatory, used when a user exits a room */
+socket.on('disconnect', function() {
+    console.log("disconnecting from server"); 
+})
+
 });
 
 process.on('SIGINT', async function() {
 	await account_management.closeDatabaseConnection();
 	process.exit(0);
 });
-
-    /*
-    remove a user from a room
-    called when a game ends
-    */
-    socket.on('leave', function(room) {
-        console.log("game over, leaving room");
-        socket.leave(room);
-    })
-
-    /*disconnect: Self explanatory, used when a user exits a room */
-    socket.on('disconnect', function() {
-        console.log("disconnecting from server"); 
-    })
-
-})
 
 server.listen(3000,()=>{
     console.log('Node app is running on port 3000, hi' );
