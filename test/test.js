@@ -3,6 +3,8 @@
 const account_management = require('../account_management.js');
 const account_validation = require('../account_validation.js');
 const password_reset = require('../password_reset.js');
+const Player = require('../player.js');
+const Room = require('../room.js');
 
 const crypto = require('crypto'); 	
 const assert = require('assert');
@@ -650,6 +652,67 @@ describe("Backend Tests", function() {
 			});
 		});
 	}); 
+
+	describe("server_methods", function(){
+			
+		describe('buildPlayer', function () {
+
+					it("Should generate random names properly", async () => {
+						var p = new Player();
+						var p2 = new Player();
+						assert(true);
+					});
+			
+					it("Should construct correct new player objects with correct name", async () => {
+						var name = "player1";
+						var p = new Player(name, 0)
+						assert(p.name == name);
+					});
+					it("Should construct correct new player objects with correct elo", async () => {
+						var name = "player1";
+						var elo = 67;
+						var p = new Player(name, elo)
+						assert(p.elo = elo);
+					});
+					it("Should construct players to valid defauly parameters", async() => {
+						var p = new Player("abc", 123);
+						assert(p.health == 100 && p.mana == 100 && p.room == '-1');
+					});
+					it("Should generate proper and valid random names for rooms", async() => {
+						var r = new Room();
+						assert(r.name.length > 1);
+					});
+					it("Should not generate the same room name twice", async() => {
+						var r1 = new Room();
+						var r2 = new Room();
+						assert(r1.name != r2.name);
+					});
+					it("Should defaultly set rooms to be empty", async() => {
+						var room = new Room();
+						assert(room.size == 0 && room.players.length == 0);
+					});
+					it(" Should properly add players to rooms with addPlayer()", async() => {
+						var r = new Room();
+						var p = new Player("testplayer", 10);
+						r.addPlayer(p);
+						assert(r.size == 1 && r.players.pop() == p);
+					});
+					it(" Should properly clear out rooms", async() => {
+						var r = new Room();
+						r.addPlayer(new Player("test1", 12));
+						r.addPlayer(new Player("test2", 20));
+						r.clearRoom()
+						assert(r.size == 0 && r.players.length == 0);
+					});
+					it(" Should return the proper size with getSize()", async() => {
+						var r = new Room();
+						var p = new Player("testplayer", 10);
+						r.addPlayer(p);
+						assert(r.getSize() == 1);
+					});
+
+				});
+			}); 
 });
 
 /*
