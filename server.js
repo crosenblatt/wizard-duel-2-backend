@@ -199,6 +199,27 @@ io.on('connection', (socket) => {
 	socket.emit('statsValid', result);
   });
 
+  socket.on('getLeaderboardInfo', async function(startRank, endRank){
+  	let leaderboardInfo = {
+  		"valid": -1,
+    	"userCount": 0,
+    	"userInfo": []
+   	};
+  
+    let info = await leaderboardInfo.getLeaderboardInfo(startRank, endRank);
+
+    if(info === -1) {
+    	leaderboardInfo.valid = info;
+    } else {
+    	leaderboardInfo.valid = 0;
+    	leaderboardInfo.userCount = info.userCount;
+    	leaderboardInfo.userInfo = info.userInfo;
+    }
+
+    socket.emit('leaderboardValid', leaderboardInfo);
+  });
+
+
   socket.on('resetPassword', async function(username, email){
 	console.log(username + " " + email);
 	let result = {"valid": -1 };
@@ -209,7 +230,6 @@ io.on('connection', (socket) => {
 	}
 	socket.emit('passwordReset', result);
   });
-
 
   /*
   remove a user from a room

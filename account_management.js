@@ -246,6 +246,37 @@ const updateAccountStats = async function(usrname, stats) {
 	else {return 0;} 
 }
 
+/*
+ * Summary. Function that gets the username, rank, and ELO of all users in a certain rank range..
+ *
+ * @param {int} startRank 	The beginning of the range of ranks you want to pull (INCLUSIVE)
+ * @param {int} endRank     The end of the range of ranks you want to pull (INCLUSIVE)
+ *
+ * @return {int}     Returns a value depending on invalid information (-1 = Cannot connect to database)
+ * @return {object}  Returns an object that holds an int with the number of users in the rank range and an array of objects for the users with ranks within the designated range 
+ */
+const getLeaderboardInfo = async function(startRank, endRank) {
+   	if (startRank >= endRank) {
+  		return -1;
+  	}
+
+    let leaderboardInfo = {
+    	userCount: 0,
+    	userInfo: []
+    };
+
+    let temp;
+  	try {
+      temp = await db.collection('User Accounts').find({rank: {$gte:startRank, $lte: endRank}},{projection: {username: true, rank: true, eloRating: true, _id: false}});
+      leaderboardInfo.userCount = await temp.count();
+      leaderboardInfo.userInfo = await temp.toArray();
+  	} catch (err) {
+		console.log(err.stack);
+		return -1;
+	}
+
+    return leaderboardInfo;
+}
 
 /*
  * Summary. Function that updates if the user is online.
@@ -440,6 +471,32 @@ const userAccountExists = async function(usrname) {
 	return userExists;
 }
 
+/*
+async function test () {
+  await startDatabaseConnection();
+
+  for(let i = 0; i < 10; i++) {
+  	let string = "test" + i;
+  	let stats = {
+  		level: i, 
+  		rank: i + 1, 
+  		eloRating: i + 2, 
+  		wins: i + 1, 
+  		losses: i
+  	};
+    await createAccount(string, string, string);
+    await updateAccountStats(string, stats);
+   }
+
+   let leaderboardInfo = await getLeaderboardInfo(1, 10);
+   console.log(leaderboardInfo);
+
+  await closeDatabaseConnection();
+}
+
+test();
+*/
+
 // Exports Relevant Function so other components of the server can use
 module.exports = {
 	startDatabaseConnection:startDatabaseConnection,
@@ -448,6 +505,7 @@ module.exports = {
 	deleteAccount: deleteAccount,
 	getAccountPassword: getAccountPassword,
 	updatePassword: updatePassword,
+	getLeaderboardInfo: getLeaderboardInfo,
 	getAccountStats: getAccountStats,
 	updateAccountStats: updateAccountStats,
 	getAccountStatus:getAccountStatus,
