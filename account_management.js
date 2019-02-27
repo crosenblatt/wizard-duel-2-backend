@@ -49,6 +49,22 @@ const closeDatabaseConnection = async function() {
 }
 
 /*
+ * Summary. Function that clears database.
+ *
+ * @return {int} Returns a value depending on if server disconnected from database or not (-1 = Cannot close connection to database, 0 = Dropped Successfully) 
+ */
+const clearDatabase = async function() {
+	try {
+		db.collection('User Accounts').drop();
+	}catch(err){
+		console.log(err.stack);
+		return -1;
+	}
+	
+	return 0;
+}
+
+/*
  * Summary. Function that creates a new user account
  *
  * @param {String} usrname  The username of the account being created
@@ -269,7 +285,7 @@ const getLeaderboardInfo = async function(startRank, endRank) {
   	try {
       temp = await db.collection('User Accounts').find({rank: {$gte:startRank, $lte: endRank}},{projection: {username: true, rank: true, eloRating: true, _id: false}});
       leaderboardInfo.userCount = await temp.count();
-      leaderboardInfo.userInfo = await temp.toArray();
+      leaderboardInfo.userInfo = await temp.sort({rank: 1}).toArray();
   	} catch (err) {
 		console.log(err.stack);
 		return -1;
@@ -471,36 +487,11 @@ const userAccountExists = async function(usrname) {
 	return userExists;
 }
 
-/*
-async function test () {
-  await startDatabaseConnection();
-
-  for(let i = 0; i < 10; i++) {
-  	let string = "test" + i;
-  	let stats = {
-  		level: i, 
-  		rank: i + 1, 
-  		eloRating: i + 2, 
-  		wins: i + 1, 
-  		losses: i
-  	};
-    await createAccount(string, string, string);
-    await updateAccountStats(string, stats);
-   }
-
-   let leaderboardInfo = await getLeaderboardInfo(1, 10);
-   console.log(leaderboardInfo);
-
-  await closeDatabaseConnection();
-}
-
-test();
-*/
-
 // Exports Relevant Function so other components of the server can use
 module.exports = {
 	startDatabaseConnection:startDatabaseConnection,
 	closeDatabaseConnection:closeDatabaseConnection,
+	clearDatabase:clearDatabase,
 	createAccount: createAccount,
 	deleteAccount: deleteAccount,
 	getAccountPassword: getAccountPassword,

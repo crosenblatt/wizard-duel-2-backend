@@ -14,6 +14,7 @@ describe("Backend Tests", function() {
 	// Starts Connection with the Database before running tests-> ALWAYS MOVE THIS TO THE TOP LEVEL DESCRIBE OR TESTING WILL BREAK
 	before(async () => {
 		await account_management.startDatabaseConnection();
+		await account_management.clearDatabase();
 	});
 
 	// Closes Connection with the Database after running tests -> ALWAYS MOVE THIS TO THE TOP LEVEL DESCRIBE OR TESTING WILL BREAK
@@ -249,7 +250,6 @@ describe("Backend Tests", function() {
 				assert(result === 1);
 			});
 		});
-
 	});
 
 	// Database Account Management Tests
@@ -258,6 +258,7 @@ describe("Backend Tests", function() {
 			
 			//Takes a second to communicate with the database
 			this.slow(3000);
+			this.timeout(10000);
 
 			it("should return that account was successfully created.", async () => {
 				let username, password, hash, email, userCheck, passwordCheck, emailCheck;
@@ -333,6 +334,7 @@ describe("Backend Tests", function() {
 			
 			//Reseting Time to be a little slower since salting and hashing takes a second
 			this.slow(3000);
+			this.timeout(10000);
 
 			it("should return that password was successfully changed.", async () => {
 				let username, password, hash, newPassword, newHash, email, result;
@@ -547,8 +549,83 @@ describe("Backend Tests", function() {
 				}
 				assert(statsResult === 0 && userResult === 1);
 			});
-
 		});
+
+        describe("#getLeaderboardInfo()", function () {
+        	//Takes a second to communicate with the database
+			this.slow(10000);
+			this.timeout(10000);
+
+			it("should return usernames for all the generated users within rank range (1-10).", async () => {
+				// Creating test users to add to the database.
+  				for(let i = 0; i < 10; i++) {
+  					let string = "test" + i;
+  					let stats = {
+  						level: i, 
+  						rank: i + 1, 
+  						eloRating: i + 2, 
+  						wins: i + 1, 
+  						losses: i
+  					};
+    				await account_management.createAccount(string, string, string);
+    				await account_management.updateAccountStats(string, stats);
+   				}	
+
+   				let result = await account_management.getLeaderboardInfo(1, 10);
+   				let success = 0;
+   				for(let i = 0; i < 10; i++) {
+  					let string = "test" + i;
+   					if (result.userInfo[i].username === string && result.userInfo[i].rank === (i+1)) {
+   						success = 1;
+   					} else {
+   					    success = 0;
+   					}
+   					await account_management.deleteAccount(string);
+   				}
+
+   				assert(success === 1 && result.userCount === 10);
+			});
+
+			it("should only return the generated users within the tested range (1-25).", async () => {
+				// Creating test users to add to the database.
+				let count = 0;
+				let randomUsers = [];
+  				for(let i = 0; i < 25; i++) {
+  					let randRank = Math.floor(Math.random() * (25)) + 1;
+  					let string = "test" + randRank;
+  					if(!randomUsers.includes(randRank)) {
+  						randomUsers[count] = randRank;
+  						count++;
+  					}
+
+  					let stats = {
+  						level: i, 
+  						rank: randRank, 
+  						eloRating: i + 2, 
+  						wins: i + 1, 
+  						losses: i
+  					};
+    				await account_management.createAccount(string, string, string);
+    				await account_management.updateAccountStats(string, stats);
+   				}	
+
+   				randomUsers.sort(function(a, b){return a - b});
+
+   				let result = await account_management.getLeaderboardInfo(1, 25);
+   				let success = 0;
+   				for(let i = 0; i < count; i++) {
+  					let string = "test" + randomUsers[i];
+   					if (result.userInfo[i].username === string && result.userInfo[i].rank === (randomUsers[i])) {
+   						success = 1;
+   					} else {
+   					    success = 0;
+   					}
+   					await account_management.deleteAccount(string);
+   				}
+
+   				assert(success === 1 && result.userCount === count);
+			});
+        });
 
 	});
 
@@ -574,6 +651,7 @@ describe("Backend Tests", function() {
 		describe("#updateAccountInfo()", function (){
 			// Takes a second to connect to the database
 			this.slow(3000);
+			this.timeout(10000);
 
 			it("should return that password was successfully changed.", async () => {
 				let username, password, hash, newPassword, email, updateSuccess, result;
@@ -653,58 +731,59 @@ describe("Backend Tests", function() {
 		});
 	}); 
 
-	describe("server_methods", function(){
+    // Player Class Tests
+	describe("player_class", function(){
 			
 		describe('buildPlayer', function () {
 
-					it("Should generate random names properly", async () => {
+					it("should generate random names properly", () => {
 						var p = new Player();
 						var p2 = new Player();
 						assert(true);
 					});
 			
-					it("Should construct correct new player objects with correct name", async () => {
+					it("should construct correct new player objects with correct name", () => {
 						var name = "player1";
 						var p = new Player(name, 0)
 						assert(p.name == name);
 					});
-					it("Should construct correct new player objects with correct elo", async () => {
+					it("should construct correct new player objects with correct elo", () => {
 						var name = "player1";
 						var elo = 67;
 						var p = new Player(name, elo)
 						assert(p.elo = elo);
 					});
-					it("Should construct players to valid defauly parameters", async() => {
+					it("should construct players to valid defauly parameters", () => {
 						var p = new Player("abc", 123);
 						assert(p.health == 100 && p.mana == 100 && p.room == '-1');
 					});
-					it("Should generate proper and valid random names for rooms", async() => {
+					it("should generate proper and valid random names for rooms", () => {
 						var r = new Room();
 						assert(r.name.length > 1);
 					});
-					it("Should not generate the same room name twice", async() => {
+					it("should not generate the same room name twice", () => {
 						var r1 = new Room();
 						var r2 = new Room();
 						assert(r1.name != r2.name);
 					});
-					it("Should defaultly set rooms to be empty", async() => {
+					it("should defaultly set rooms to be empty", () => {
 						var room = new Room();
 						assert(room.size == 0 && room.players.length == 0);
 					});
-					it(" Should properly add players to rooms with addPlayer()", async() => {
+					it("should properly add players to rooms with addPlayer()", () => {
 						var r = new Room();
 						var p = new Player("testplayer", 10);
 						r.addPlayer(p);
 						assert(r.size == 1 && r.players.pop() == p);
 					});
-					it(" Should properly clear out rooms", async() => {
+					it("should properly clear out rooms", () => {
 						var r = new Room();
 						r.addPlayer(new Player("test1", 12));
 						r.addPlayer(new Player("test2", 20));
 						r.clearRoom()
 						assert(r.size == 0 && r.players.length == 0);
 					});
-					it(" Should return the proper size with getSize()", async() => {
+					it("should return the proper size with getSize()", () => {
 						var r = new Room();
 						var p = new Player("testplayer", 10);
 						r.addPlayer(p);
@@ -713,7 +792,7 @@ describe("Backend Tests", function() {
 
 				});
 			}); 
-});
+    });
 
 /*
  * Summary. Function that generates temporary strings for the tests
