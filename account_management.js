@@ -1,4 +1,5 @@
 const MongoClient = require('mongodb').MongoClient; // Framework to communicate with MongoDB Database
+const Binary = require('mongodb').Binary; // Framework to store binary data in MongoDB
 const fs = require("fs"); // USED FOR TESTING PROFILE PICTURE UPLOAD
 const uri = "mongodb+srv://WizardDuel2Server:WkpqH14nTFi9jXwu@wizard-duel-backend-4krit.mongodb.net/test?retryWrites=true"
 const client = new MongoClient(uri, { useNewUrlParser: true });
@@ -83,7 +84,7 @@ const createAccount = async function(usrname, pass, mail) {
 		"online": false,
 		"email": mail,
 		"title": TITLE.NONE,
-		"profilePic": {data: null, contentType: null},
+		"profilePic": null,
 		"level": 1,
 		"rank": -1,
 		"eloRating": -1,
@@ -449,19 +450,22 @@ const updateAccountTitle = async function(usrname, active_title) {
  *
  * @param {String} 		 usrname 	  The username of the account which the profile picture is being updated
  * @param {Binary Data}  pictureData  The Binary Data for the profile picture being updated.
+ * @param {String}       fileName     The Name of the picture file. -> INCLUDE FILE EXTENSION -> MIGHT REMOVE LATER BASED ON CLIENT SIDE IMPLEMENTATION
  *
  * @return {int} Returns a value depending on invalid information (-1 = Cannot connect to database, 0 = valid, 1 = Invalid Username) 
  */
-const updateAccountProfilePicture = async function(usrname, pictureData) {
+const updateAccountProfilePicture = async function(usrname, pictureData, fileName) {
 	let userExists;
+	let imgData = {};
 	try {
-
 		//userExists = await db.collection('User Accounts').find({username: usrname}).limit(1).count(true);
 		userExists = await userAccountExists(usrname);
 		if(userExists === -1){return -1;}	
 
 		if (userExists) {
-			await db.collection('User Accounts').updateOne({username: usrname}, {$set: {profilePic: pictureData}});
+			imgData.data = Binary(pictureData);
+			imgData.name = fileName;
+			await db.collection('User Accounts').updateOne({username: usrname}, {$set: {profilePic: imgData}});
 		}
 
 	} catch (err) {
@@ -480,7 +484,7 @@ const updateAccountProfilePicture = async function(usrname, pictureData) {
  * @param {String} usrname  The username of the account which the profile picture is being extracted
  *
  * @return {int} 		  Returns a value depending on invalid information (-1 = Cannot connect to database, 1 = Invalid Username)
- * @return {Binary Data}  Returns the binary data of the profile picture
+ * @return {object}       Returns a JSON Object with BSON Object containing a buffer array of the profile pic's binary data and a string containing a file name.
  */
 const getAccountProfilePicture = async function(usrname) {
 	let userExists, info;
@@ -548,15 +552,44 @@ const userAccountExists = async function(usrname) {
 	return userExists;
 }
 
-
+/*
 async function test() {
 	await startDatabaseConnection();
 	await clearDatabase();
     await createAccount("test", "test", "test");
-    
+    let imageBuffer = await readFileAsync('./test/test.png');
+    await updateAccountProfilePicture("test", imageBuffer, "output.png");
+    let dbData = await getAccountProfilePicture('test');
+    //console.log(dbData);
+    writeFileAsync(dbData.name, dbData.data.buffer);
 	await closeDatabaseConnection();
 }
  test();
+
+function readFileAsync(path) {
+  return new Promise(function (resolve, reject) {
+    fs.readFile(path, function (error, result) {
+      if (error) {
+        reject(error);
+      } else {
+        resolve(result);
+      }
+    });
+  });
+}
+
+function writeFileAsync(path, buffer) {
+  return new Promise(function (resolve, reject) {
+    fs.writeFile(path, buffer, function (error, result) {
+      if (error) {
+        reject(error);
+      } else {
+        resolve(result);
+      }
+    });
+  });
+}
+*/
 
 // Exports Relevant Function so other components of the server can use
 module.exports = {
@@ -575,6 +608,8 @@ module.exports = {
 	getAccountEmail: getAccountEmail,
 	getAccountInfo: getAccountInfo,
 	updateAccountTitle: updateAccountTitle,
+	getAccountProfilePicture: getAccountProfilePicture,
+	updateAccountProfilePicture: updateAccountProfilePicture,
 	accountEmailExists: accountEmailExists,
 	userAccountExists: userAccountExists
 };
