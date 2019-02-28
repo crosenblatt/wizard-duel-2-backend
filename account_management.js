@@ -1,5 +1,5 @@
 const MongoClient = require('mongodb').MongoClient; // Framework to communicate with MongoDB Database
-
+const fs = require("fs"); // USED FOR TESTING PROFILE PICTURE UPLOAD
 const uri = "mongodb+srv://WizardDuel2Server:WkpqH14nTFi9jXwu@wizard-duel-backend-4krit.mongodb.net/test?retryWrites=true"
 const client = new MongoClient(uri, { useNewUrlParser: true });
 
@@ -83,6 +83,7 @@ const createAccount = async function(usrname, pass, mail) {
 		"online": false,
 		"email": mail,
 		"title": TITLE.NONE,
+		"profilePic": {data: null, contentType: null},
 		"level": 1,
 		"rank": -1,
 		"eloRating": -1,
@@ -401,7 +402,7 @@ const getAccountInfo = async function(usrname) {
 		if(userExists === -1){return -1;}		
 
 		if (userExists) {
-			info = await db.collection('User Accounts').findOne({username: usrname}, {projection: {title: true, level: true, rank: true, eloRating: true, wins: true, losses: true, spellbook: true, _id: false}});
+			info = await db.collection('User Accounts').findOne({username: usrname}, {projection: {profilePic: true, title: true, level: true, rank: true, eloRating: true, wins: true, losses: true, spellbook: true, _id: false}});
 		}
 
 	} catch (err) {
@@ -442,6 +443,66 @@ const updateAccountTitle = async function(usrname, active_title) {
 	if (!userExists) {return 1;}
 	else {return 0;} 
 }
+
+/*
+ * Summary. Function that updates the active profile picture of a user account.
+ *
+ * @param {String} 		 usrname 	  The username of the account which the profile picture is being updated
+ * @param {Binary Data}  pictureData  The Binary Data for the profile picture being updated.
+ *
+ * @return {int} Returns a value depending on invalid information (-1 = Cannot connect to database, 0 = valid, 1 = Invalid Username) 
+ */
+const updateAccountProfilePicture = async function(usrname, pictureData) {
+	let userExists;
+	try {
+
+		//userExists = await db.collection('User Accounts').find({username: usrname}).limit(1).count(true);
+		userExists = await userAccountExists(usrname);
+		if(userExists === -1){return -1;}	
+
+		if (userExists) {
+			await db.collection('User Accounts').updateOne({username: usrname}, {$set: {profilePic: pictureData}});
+		}
+
+	} catch (err) {
+		console.log(err.stack);
+		return -1;
+	}
+
+	if (!userExists) {return 1;}
+	else {return 0;} 
+}
+
+
+/*
+ * Summary. Function that gets the profile picture for an account
+ *
+ * @param {String} usrname  The username of the account which the profile picture is being extracted
+ *
+ * @return {int} 		  Returns a value depending on invalid information (-1 = Cannot connect to database, 1 = Invalid Username)
+ * @return {Binary Data}  Returns the binary data of the profile picture
+ */
+const getAccountProfilePicture = async function(usrname) {
+	let userExists, info;
+	try {
+
+		//userExists = await db.collection('User Accounts').find({username: usrname}).limit(1).count(true);
+		userExists = await userAccountExists(usrname);
+		if(userExists === -1){return -1;}		
+
+		if (userExists) {
+			info = await db.collection('User Accounts').findOne({username: usrname}, {projection: {profilePic: true}});
+		}
+
+	} catch (err) {
+		console.log(err.stack);
+		return -1;
+	}
+
+	if (!userExists) {return 1;}
+	else {return info.profilePic;} 
+}
+
 
 /*
  * Summary. Function that checks if email exists in database
@@ -486,6 +547,16 @@ const userAccountExists = async function(usrname) {
 
 	return userExists;
 }
+
+
+async function test() {
+	await startDatabaseConnection();
+	await clearDatabase();
+    await createAccount("test", "test", "test");
+    
+	await closeDatabaseConnection();
+}
+ test();
 
 // Exports Relevant Function so other components of the server can use
 module.exports = {
