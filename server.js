@@ -3,6 +3,7 @@ const account_validation = require('./account_validation.js');
 const account_management = require('./account_management.js');
 const Room = require('./room.js')
 const Player = require('./player.js')
+const fs = require("fs");
 //const Queue = require('./queue.js').default
 var waitUntil = require('wait-until')
 const express = require('express'),
@@ -218,6 +219,40 @@ io.on('connection', (socket) => {
 
     socket.emit('leaderboardValid', leaderboardInfo);
   });
+
+  /*
+  Retrieve a player's profile picture
+  */
+  socket.on('getProfilePic', async function(name) {
+      let pic = await account_management.getAccountProfilePicture(name)
+      if(pic != -1 && pic != 1 && pic != 2) {
+        let buffer = pic.data.buffer
+        console.log(buffer)
+        let retVal = {
+          "pic": buffer
+        }
+        //fs.writeFileSync("./picture.png", buffer)
+        socket.emit('profilePic', retVal)
+      }
+      console.log(pic)
+      
+  })
+
+  socket.on('updateProfilePic', async function(name, pic, file) {
+    console.log("updating profile pic...");
+    //console.log(pic);
+    //var byteObj = JSON.parse(pic);
+    console.log(pic);
+    //fs.writeFileSync("./test.png", pic)
+    let ret = await account_management.updateAccountProfilePicture(name, pic, file);
+    if(ret != 0) {
+        console.log("picture update error: " + ret);
+    } else {
+        console.log("picture update success");
+    }
+    console.log("updated");
+    return;
+  })
 
 
   socket.on('resetPassword', async function(username, email){

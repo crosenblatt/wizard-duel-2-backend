@@ -503,7 +503,15 @@ const getAccountProfilePicture = async function(usrname) {
 		return -1;
 	}
 
-	if (!userExists) {return 1;}
+	if (!userExists) {
+		console.log("user does not exist")
+		return 1;
+	}
+
+	if(info.profilePic == null) {
+		console.log("no picture")
+		return 2;
+	}
 	else {return info.profilePic;} 
 }
 
