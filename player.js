@@ -1,11 +1,28 @@
+
+const titles = ["Scrub", "Rookie", "Competent", "Adept", "Expert", "Professional", "Master", "Grand Master", "God", "Gustavo"];
+
 class Player {
-    constructor(name, elo) {
+    constructor(name, elo, experience = 0) {
       this.name = name;
       this.health = 100;
       this.mana = 100;
       this.spellbook = [-1,-1,-1,-1,-1];
       this.elo = elo;
-      this.room = "-1"
+      this.room = "-1";
+      this.experience = experience;
+      this.title = setTitle(experience);
+    }
+    // These are temporary, update these later if necessary
+
+
+    setTitle(experience) {
+      // Title for max experience
+      if (experience >= 900){
+        this.title = titles[9];
+      }
+      else{
+        this.title = titles[Math.trunc(experience / 100)];
+      }
     }
 
 
@@ -27,7 +44,7 @@ class Player {
     
     }
     
-  
+    
 
 
   }
