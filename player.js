@@ -1,5 +1,6 @@
 
 const titles = ["Scrub", "Rookie", "Competent", "Adept", "Expert", "Professional", "Master", "Grand Master", "God", "Gustavo"];
+const maxExp = 900;
 
 class Player {
     constructor(name, elo, experience = 0) {
@@ -17,14 +18,39 @@ class Player {
 
     setTitle(experience) {
       // Title for max experience
-      if (experience >= 900){
-        this.title = titles[9];
+      if (experience >= maxExp){
+        this.title = titles[Math.trunc(maxExp / 100)];
       }
       else{
         this.title = titles[Math.trunc(experience / 100)];
       }
     }
 
+    leaveRoom(){
+      this.room = "-1";
+    }
+
+    restoreHealthAndMana(){
+      this.health = 100;
+      this.mana = 100;
+    }
+
+    setGodMode(){
+      this.health = 999999;
+      this.mana = 999999;
+    }
+
+    resetProgress(){
+      this.experience = 0;
+    }
+
+    setMaxLevel(){
+      this.experience = maxExp;
+    }
+
+    clearSpellBook(){
+      this.spellbook = [-1,-1,-1,-1,-1];
+    }
 
     static capFirst(string) {
         return string.charAt(0).toUpperCase() + string.slice(1);
