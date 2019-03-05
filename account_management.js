@@ -454,11 +454,11 @@ const updateAccountTitle = async function(usrname, active_title) {
  * Summary. Function that updates the unlocked title array of a user account.
  *
  * @param {String}      usrname 		 The username of the account which the stats are being updated
- * @param {INT array}   unlockedTitles   The updated active title of the user account
+ * @param {INT array}   unlocked_titles   The updated active title of the user account
  *
  * @return {int} Returns a value depending on invalid information (-1 = Cannot connect to database, 0 = valid, 1 = Invalid Username) 
  */
-const updateAccountTitle = async function(usrname, unlocked_titles) {
+const updateAccountUnlockedTitles = async function(usrname, unlocked_titles) {
 	let userExists;
 	try {
 
@@ -650,6 +650,7 @@ module.exports = {
 	getAccountEmail: getAccountEmail,
 	getAccountInfo: getAccountInfo,
 	updateAccountTitle: updateAccountTitle,
+	updateAccountUnlockedTitles: updateAccountUnlockedTitles,
 	getAccountProfilePicture: getAccountProfilePicture,
 	updateAccountProfilePicture: updateAccountProfilePicture,
 	accountEmailExists: accountEmailExists,

@@ -217,6 +217,21 @@ io.on('connection', (socket) => {
   	socket.emit('userInfo', result);
   });
 
+  /* Updates active user title for the database */
+  socket.on('updateActiveTitle', async function (username, titleNum){
+  	let result;
+  	result = await account_management.updateAccountTitle(username, titleNum);
+	//socket.emit('updateTitle', result);
+	return;
+  });
+
+  /* Updates a user's unlocked titles in the database -> JUST FOR TESTING. SHOULD BE IMPLEMENTED AFTER usER FINISHES A MATCH */
+  socket.on('updateUnlockedTitles', async function (username, unlockedArray){
+  	let result;
+  	result = await account_management.updateAccountUnlockedTitles(username, unlockedArray);
+  	///socket.emit('updateUnlockedTitles', result);
+  	return;
+  });
 
   socket.on('getLeaderboardInfo', async function(startRank, endRank){
   	let leaderboardInfo = {
