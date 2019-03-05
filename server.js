@@ -200,6 +200,24 @@ io.on('connection', (socket) => {
 	socket.emit('statsValid', result);
   });
 
+
+  /* Gets the account info of the given username -> USED TO DISPLAY OTHER USER'S INFO TO CLIENT*/
+  socket.on('getUserInfo', async function(username){
+  	let result = {
+  		"valid": -1,
+  		"userInfo": {}
+  	};
+  	let info = await account_management.getAccountInfo(username);
+  	if(info === -1 || info === 1) {
+  		result.valid = info;
+  	} else {
+  		result.valid = 0;
+  		result.userInfo = info;
+  	}
+  	socket.emit('userInfo', result);
+  });
+
+
   socket.on('getLeaderboardInfo', async function(startRank, endRank){
   	let leaderboardInfo = {
   		"valid": -1,
@@ -236,7 +254,7 @@ io.on('connection', (socket) => {
       }
       console.log(pic)
       
-  })
+  });
 
   socket.on('updateProfilePic', async function(name, pic, file) {
     console.log("updating profile pic...");
@@ -252,7 +270,7 @@ io.on('connection', (socket) => {
     }
     console.log("updated");
     return;
-  })
+  });
 
 
   socket.on('resetPassword', async function(username, email){

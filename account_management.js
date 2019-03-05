@@ -83,7 +83,8 @@ const createAccount = async function(usrname, pass, mail) {
 		"password": pass,
 		"online": false,
 		"email": mail,
-		"title": TITLE.NONE,
+		"title": 0,
+		"UnlockedTitles": [0],
 		"profilePic": null,
 		"level": 1,
 		"rank": -1,
@@ -264,6 +265,7 @@ const updateAccountStats = async function(usrname, stats) {
 	else {return 0;} 
 }
 
+
 /*
  * Summary. Function that gets the username, rank, and ELO of all users in a certain rank range..
  *
@@ -395,7 +397,7 @@ const getAccountEmail = async function(usrname) {
  * @return {Object} Returns an Object with all non-security user information
  */
 const getAccountInfo = async function(usrname) {
-	let userExists, info;
+	let userExists, profilePicData, info;
 	try {
 
 		//userExists = await db.collection('User Accounts').find({username: usrname}).limit(1).count(true);
@@ -403,7 +405,9 @@ const getAccountInfo = async function(usrname) {
 		if(userExists === -1){return -1;}		
 
 		if (userExists) {
-			info = await db.collection('User Accounts').findOne({username: usrname}, {projection: {profilePic: true, title: true, level: true, rank: true, eloRating: true, wins: true, losses: true, spellbook: true, _id: false}});
+			info = await db.collection('User Accounts').findOne({username: usrname}, {projection: {profilePic: true, title: true, UnlockedTitles: true, level: true, rank: true, eloRating: true, wins: true, losses: true, spellbook: true, _id: false}});
+			profilePicData = info.profilePic.data.buffer;
+			info.profilePic = profilePicData;
 		}
 
 	} catch (err) {
@@ -434,6 +438,36 @@ const updateAccountTitle = async function(usrname, active_title) {
 
 		if (userExists) {
 			await db.collection('User Accounts').updateOne({username: usrname}, {$set: {title: active_title}});
+		}
+
+	} catch (err) {
+		console.log(err.stack);
+		return -1;
+	}
+
+	if (!userExists) {return 1;}
+	else {return 0;} 
+}
+
+
+/*
+ * Summary. Function that updates the unlocked title array of a user account.
+ *
+ * @param {String}      usrname 		 The username of the account which the stats are being updated
+ * @param {INT array}   unlockedTitles   The updated active title of the user account
+ *
+ * @return {int} Returns a value depending on invalid information (-1 = Cannot connect to database, 0 = valid, 1 = Invalid Username) 
+ */
+const updateAccountTitle = async function(usrname, unlocked_titles) {
+	let userExists;
+	try {
+
+		//userExists = await db.collection('User Accounts').find({username: usrname}).limit(1).count(true);
+		userExists = await userAccountExists(usrname);
+		if(userExists === -1){return -1;}	
+
+		if (userExists) {
+			await db.collection('User Accounts').updateOne({username: usrname}, {$set: {UnlockedTitles: unlocked_titles}});
 		}
 
 	} catch (err) {
