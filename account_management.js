@@ -406,7 +406,11 @@ const getAccountInfo = async function(usrname) {
 
 		if (userExists) {
 			info = await db.collection('User Accounts').findOne({username: usrname}, {projection: {profilePic: true, title: true, UnlockedTitles: true, level: true, rank: true, eloRating: true, wins: true, losses: true, spellbook: true, _id: false}});
-			profilePicData = info.profilePic.data.buffer;
+			if (info.profilePic != null) {
+				profilePicData = info.profilePic.data.buffer;
+			} else {
+				profilePicData = null;
+			}
 			info.profilePic = profilePicData;
 		}
 

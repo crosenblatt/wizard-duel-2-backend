@@ -219,6 +219,7 @@ io.on('connection', (socket) => {
 
   /* Updates active user title for the database */
   socket.on('updateActiveTitle', async function (username, titleNum){
+  	//console.log(username + " " + titleNum);
   	let result;
   	result = await account_management.updateAccountTitle(username, titleNum);
 	//socket.emit('updateTitle', result);
@@ -226,7 +227,9 @@ io.on('connection', (socket) => {
   });
 
   /* Updates a user's unlocked titles in the database -> JUST FOR TESTING. SHOULD BE IMPLEMENTED AFTER usER FINISHES A MATCH */
+  /* NEED JSON ARRAY PASSED IN */
   socket.on('updateUnlockedTitles', async function (username, unlockedArray){
+  	console.log(username + " " + unlockedArray);
   	let result;
   	result = await account_management.updateAccountUnlockedTitles(username, unlockedArray);
   	///socket.emit('updateUnlockedTitles', result);
