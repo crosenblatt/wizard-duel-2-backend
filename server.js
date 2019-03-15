@@ -215,7 +215,7 @@ io.on('connection', (socket) => {
 process.on('SIGINT', async function() {
 	await account_management.closeDatabaseConnection();
 	process.exit(0);
-});
+
 
     /*
     remove a user from a room
@@ -231,7 +231,7 @@ process.on('SIGINT', async function() {
         console.log("disconnecting from server"); 
     })
 
-})
+});
 
 server.listen(3000,()=>{
     console.log('Node app is running on port 3000, hi' );
