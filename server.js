@@ -28,6 +28,18 @@ for(var i = 0; i < 10; i++){
     //rooms[i].addPlayer(new Player("test" + i, (i * 50) + 100))
 }
 
+function verifyRooms() {
+    rooms.forEach(function(room) {
+        if( room.size < 2) {
+            return;
+        }
+    })
+    //make new rooms bc all are full
+    for( var i = 0; i < 5; i++) {
+        rooms.push(new Room());
+    }
+}
+
 io.on('connection', (socket) => {
 
     console.log('user connected');
@@ -43,6 +55,8 @@ io.on('connection', (socket) => {
         // Find first open room and place player in it
         var found = false;
 
+        //check if all rooms are full
+        verifyRooms();
         // First check for rooms w/ 1 player and match by ELO up to certain threshold
         eloRange = 5;
         while(eloRange < 50 && !found){
