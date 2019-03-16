@@ -11,20 +11,16 @@ class Player {
       this.elo = elo;
       this.room = "-1";
       this.experience = experience;
-      this.title = setTitle(experience);
-    }
-    // These are temporary, update these later if necessary
-
-
-    setTitle(experience) {
-      // Title for max experience
-      if (experience >= maxExp){
+      if (this.experience >= maxExp){
         this.title = titles[Math.trunc(maxExp / 100)];
       }
       else{
-        this.title = titles[Math.trunc(experience / 100)];
+        this.title = titles[Math.trunc(this.experience / 100)];
       }
+
+
     }
+    // These are temporary, update these later if necessary
 
     leaveRoom(){
       this.room = "-1";
