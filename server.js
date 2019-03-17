@@ -29,6 +29,18 @@ for(var i = 0; i < 10; i++){
     //rooms[i].addPlayer(new Player("test" + i, (i * 50) + 100))
 }
 
+function verifyRooms() {
+    rooms.forEach(function(room) {
+        if( room.size < 2) {
+            return;
+        }
+    })
+    //make new rooms bc all are full
+    for( var i = 0; i < 5; i++) {
+        rooms.push(new Room());
+    }
+}
+
 io.on('connection', (socket) => {
 
     console.log('user connected');
@@ -44,6 +56,8 @@ io.on('connection', (socket) => {
         // Find first open room and place player in it
         var found = false;
 
+        //check if all rooms are full
+        verifyRooms();
         // First check for rooms w/ 1 player and match by ELO up to certain threshold
         eloRange = 5;
         while(eloRange < 50 && !found){
@@ -321,8 +335,27 @@ io.on('connection', (socket) => {
 process.on('SIGINT', async function() {
 	await account_management.closeDatabaseConnection();
 	process.exit(0);
+
+
+<<<<<<< HEAD
+=======
+    /*
+    remove a user from a room
+    called when a game ends
+    */
+    socket.on('leave', function(room) {
+        console.log("game over, leaving room");
+        socket.leave(room);
+    })
+
+    /*disconnect: Self explanatory, used when a user exits a room */
+    socket.on('disconnect', function() {
+        console.log("disconnecting from server"); 
+    })
+
 });
 
+>>>>>>> e544ba163fafedeb4ead14e83025e549e5ef534e
 server.listen(3000,()=>{
     console.log('Node app is running on port 3000, hi' );
 })
