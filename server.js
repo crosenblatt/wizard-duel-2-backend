@@ -335,27 +335,8 @@ io.on('connection', (socket) => {
 process.on('SIGINT', async function() {
 	await account_management.closeDatabaseConnection();
 	process.exit(0);
-
-
-<<<<<<< HEAD
-=======
-    /*
-    remove a user from a room
-    called when a game ends
-    */
-    socket.on('leave', function(room) {
-        console.log("game over, leaving room");
-        socket.leave(room);
-    })
-
-    /*disconnect: Self explanatory, used when a user exits a room */
-    socket.on('disconnect', function() {
-        console.log("disconnecting from server"); 
-    })
-
 });
 
->>>>>>> e544ba163fafedeb4ead14e83025e549e5ef534e
 server.listen(3000,()=>{
     console.log('Node app is running on port 3000, hi' );
-})
+});
