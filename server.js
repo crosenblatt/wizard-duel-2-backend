@@ -48,11 +48,12 @@ io.on('connection', (socket) => {
     /*
     Enqueue: Adds player to list of queued players 
     */
-    socket.on('enqueue', (name, score) => {
+    socket.on('enqueue', (name, score, level, spellbook, title) => {
         // Generate random info for now
-        var p = new Player(name, score)
-        console.log(name + " ennqueued")
-        
+
+        var p = new Player(name, score, level, spellbook, title)
+        console.log(name + " enqueued")
+
         // Find first open room and place player in it
         var found = false;
 
@@ -118,7 +119,7 @@ io.on('connection', (socket) => {
     */
 
 
-    socket.on('join', function(room, name, health, mana, spells) {
+    socket.on('join', function(room, name, health, mana, spells, level, skillScore, title) {
 
         /*
         If there are already two people in the room, the server rejects the request
@@ -133,6 +134,9 @@ io.on('connection', (socket) => {
                         "health" : health,
                         "mana" : mana,
                         "spells" : spells,
+                        "level": level,
+                        "elo": skillScore,
+                        "title": title 
                     }
 
         rooms.forEach(function(r) {
@@ -141,7 +145,10 @@ io.on('connection', (socket) => {
                     "name" : r.players[0].name,
                     "health" : r.players[0].health,
                     "mana" : r.players[0].mana,
-                    "spells" : r.players[0].spells
+                    "spells" : r.players[0].spells,
+                    "level": r.players[0].level,
+                    "elo": r.players[0].elo,
+                    "title": r.players[0].title 
                 }
                 
                 console.log("getting existing user: " + r.players[0].name)

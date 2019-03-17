@@ -3,21 +3,25 @@ const titles = ["Scrub", "Rookie", "Competent", "Adept", "Expert", "Professional
 const maxExp = 900;
 
 class Player {
-    constructor(name, elo, experience = 0) {
+    constructor(name, elo, level, spellbook, title, experience = 0) {
       this.name = name;
       this.health = 100;
       this.mana = 100;
-      this.spellbook = [-1,-1,-1,-1,-1];
       this.elo = elo;
+      this.spellbook = spellbook;
+      this.level = level;
+      this.title = title;
       this.room = "-1";
       this.experience = experience;
+
+      /*
       if (this.experience >= maxExp){
         this.title = titles[Math.trunc(maxExp / 100)];
       }
       else{
         this.title = titles[Math.trunc(this.experience / 100)];
       }
-
+      */
 
     }
     // These are temporary, update these later if necessary
