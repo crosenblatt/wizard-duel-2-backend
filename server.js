@@ -258,6 +258,13 @@ io.on('connection', (socket) => {
   	return;
   });
 
+  socket.on('updateCurrentSpellbook', async function (username, spellbook){
+    console.log(username + " " + spellbook);
+    let result;
+    result = await account_management.updateAccountSpellbook(username, spellbook);
+    return;
+  });
+
   socket.on('getLeaderboardInfo', async function(startRank, endRank){
   	let leaderboardInfo = {
   		"valid": -1,
