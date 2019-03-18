@@ -512,6 +512,7 @@ const updateAccountSpellbook = async function(usrname, new_spellbook) {
 	else {return 0;} 
 }
 
+
 /*
  * Summary. Function that updates the active profile picture of a user account.
  *
