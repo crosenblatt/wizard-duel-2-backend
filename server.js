@@ -150,7 +150,7 @@ io.on('connection', (socket) => {
                     "elo": r.players[0].elo,
                     "title": r.players[0].title 
                 }
-                
+
                 console.log("getting existing user: " + r.players[0].name)
                 socket.emit("getuser", user)
                 return;
@@ -322,6 +322,29 @@ io.on('connection', (socket) => {
 	}
 	socket.emit('passwordReset', result);
   });
+
+  socket.on('gameover', async function(username, elo, level, loss){
+  	console.log("game ended");
+
+  	let stats = await account_management.getAccountStats(username);
+  	stats.eloRating = elo;
+  	stats.level = level;
+  	if(loss === true) {
+  		stats.losses = stats.losses + 1;
+  	} else {
+  		stats.wins = stats.wins + 1;
+  	}
+
+  	//TODO: RECALCULATE RANK METHOD -> SORT DATABASE BASED ON NEW ELO
+
+  	await account_management.updateAccountStats(username, stats);
+
+  	let result = {
+  		"rank": stats.rank
+  	}
+  	socket.emit('updatedStats', result);
+  });
+
 
   /*
   remove a user from a room
