@@ -1,5 +1,6 @@
 const MongoClient = require('mongodb').MongoClient; // Framework to communicate with MongoDB Database
-
+const Binary = require('mongodb').Binary; // Framework to store binary data in MongoDB
+const fs = require("fs"); // USED FOR TESTING PROFILE PICTURE UPLOAD
 const uri = "mongodb+srv://WizardDuel2Server:WkpqH14nTFi9jXwu@wizard-duel-backend-4krit.mongodb.net/test?retryWrites=true"
 const client = new MongoClient(uri, { useNewUrlParser: true });
 
@@ -49,6 +50,22 @@ const closeDatabaseConnection = async function() {
 }
 
 /*
+ * Summary. Function that clears database.
+ *
+ * @return {int} Returns a value depending on if server disconnected from database or not (-1 = Cannot close connection to database, 0 = Dropped Successfully) 
+ */
+const clearDatabase = async function() {
+	try {
+		db.collection('User Accounts').drop();
+	}catch(err){
+		console.log(err.stack);
+		return -1;
+	}
+	
+	return 0;
+}
+
+/*
  * Summary. Function that creates a new user account
  *
  * @param {String} usrname  The username of the account being created
@@ -66,7 +83,9 @@ const createAccount = async function(usrname, pass, mail) {
 		"password": pass,
 		"online": false,
 		"email": mail,
-		"title": TITLE.NONE,
+		"title": 0,
+		"UnlockedTitles": [0],
+		"profilePic": null,
 		"level": 1,
 		"rank": -1,
 		"eloRating": -1,
@@ -248,6 +267,38 @@ const updateAccountStats = async function(usrname, stats) {
 
 
 /*
+ * Summary. Function that gets the username, rank, and ELO of all users in a certain rank range..
+ *
+ * @param {int} startRank 	The beginning of the range of ranks you want to pull (INCLUSIVE)
+ * @param {int} endRank     The end of the range of ranks you want to pull (INCLUSIVE)
+ *
+ * @return {int}     Returns a value depending on invalid information (-1 = Cannot connect to database)
+ * @return {object}  Returns an object that holds an int with the number of users in the rank range and an array of objects for the users with ranks within the designated range 
+ */
+const getLeaderboardInfo = async function(startRank, endRank) {
+   	if (startRank >= endRank) {
+  		return -1;
+  	}
+
+    let leaderboardInfo = {
+    	userCount: 0,
+    	userInfo: []
+    };
+
+    let temp;
+  	try {
+      temp = await db.collection('User Accounts').find({rank: {$gte:startRank, $lte: endRank}},{projection: {username: true, rank: true, eloRating: true, _id: false}});
+      leaderboardInfo.userCount = await temp.count();
+      leaderboardInfo.userInfo = await temp.sort({rank: 1}).toArray();
+  	} catch (err) {
+		console.log(err.stack);
+		return -1;
+	}
+
+    return leaderboardInfo;
+}
+
+/*
  * Summary. Function that updates if the user is online.
  *
  * @param {String} usrname 	The username of the account which the status is being updated
@@ -346,7 +397,7 @@ const getAccountEmail = async function(usrname) {
  * @return {Object} Returns an Object with all non-security user information
  */
 const getAccountInfo = async function(usrname) {
-	let userExists, info;
+	let userExists, profilePicData, info;
 	try {
 
 		//userExists = await db.collection('User Accounts').find({username: usrname}).limit(1).count(true);
@@ -354,7 +405,13 @@ const getAccountInfo = async function(usrname) {
 		if(userExists === -1){return -1;}		
 
 		if (userExists) {
-			info = await db.collection('User Accounts').findOne({username: usrname}, {projection: {title: true, level: true, rank: true, eloRating: true, wins: true, losses: true, spellbook: true, _id: false}});
+			info = await db.collection('User Accounts').findOne({username: usrname}, {projection: {profilePic: true, title: true, UnlockedTitles: true, level: true, rank: true, eloRating: true, wins: true, losses: true, spellbook: true, _id: false}});
+			if (info.profilePic != null) {
+				profilePicData = info.profilePic.data.buffer;
+			} else {
+				profilePicData = null;
+			}
+			info.profilePic = profilePicData;
 		}
 
 	} catch (err) {
@@ -395,6 +452,136 @@ const updateAccountTitle = async function(usrname, active_title) {
 	if (!userExists) {return 1;}
 	else {return 0;} 
 }
+
+
+/*
+ * Summary. Function that updates the unlocked title array of a user account.
+ *
+ * @param {String}      usrname 		 The username of the account which the stats are being updated
+ * @param {INT array}   unlocked_titles   The updated active title of the user account
+ *
+ * @return {int} Returns a value depending on invalid information (-1 = Cannot connect to database, 0 = valid, 1 = Invalid Username) 
+ */
+const updateAccountUnlockedTitles = async function(usrname, unlocked_titles) {
+	let userExists;
+	try {
+
+		//userExists = await db.collection('User Accounts').find({username: usrname}).limit(1).count(true);
+		userExists = await userAccountExists(usrname);
+		if(userExists === -1){return -1;}	
+
+		if (userExists) {
+			await db.collection('User Accounts').updateOne({username: usrname}, {$set: {UnlockedTitles: unlocked_titles}});
+		}
+
+	} catch (err) {
+		console.log(err.stack);
+		return -1;
+	}
+
+	if (!userExists) {return 1;}
+	else {return 0;} 
+}
+
+/*
+ * Summary. Function that updates the current spellbook of a user account.
+ *
+ * @param {String}      usrname 		 The username of the account which the stats are being updated
+ * @param {INT array}   new_spellbook    The updated active title of the user account
+ *
+ * @return {int} Returns a value depending on invalid information (-1 = Cannot connect to database, 0 = valid, 1 = Invalid Username) 
+ */
+const updateAccountSpellbook = async function(usrname, new_spellbook) {
+	let userExists;
+	try {
+
+		//userExists = await db.collection('User Accounts').find({username: usrname}).limit(1).count(true);
+		userExists = await userAccountExists(usrname);
+		if(userExists === -1){return -1;}	
+
+		if (userExists) {
+			await db.collection('User Accounts').updateOne({username: usrname}, {$set: {spellbook: new_spellbook}});
+		}
+
+	} catch (err) {
+		console.log(err.stack);
+		return -1;
+	}
+
+	if (!userExists) {return 1;}
+	else {return 0;} 
+}
+
+/*
+ * Summary. Function that updates the active profile picture of a user account.
+ *
+ * @param {String} 		 usrname 	  The username of the account which the profile picture is being updated
+ * @param {Binary Data}  pictureData  The Binary Data for the profile picture being updated.
+ * @param {String}       fileName     The Name of the picture file. -> INCLUDE FILE EXTENSION -> MIGHT REMOVE LATER BASED ON CLIENT SIDE IMPLEMENTATION
+ *
+ * @return {int} Returns a value depending on invalid information (-1 = Cannot connect to database, 0 = valid, 1 = Invalid Username) 
+ */
+const updateAccountProfilePicture = async function(usrname, pictureData, fileName) {
+	let userExists;
+	let imgData = {};
+	try {
+		//userExists = await db.collection('User Accounts').find({username: usrname}).limit(1).count(true);
+		userExists = await userAccountExists(usrname);
+		if(userExists === -1){return -1;}	
+
+		if (userExists) {
+			imgData.data = Binary(pictureData);
+			imgData.name = fileName;
+			await db.collection('User Accounts').updateOne({username: usrname}, {$set: {profilePic: imgData}});
+		}
+
+	} catch (err) {
+		console.log(err.stack);
+		return -1;
+	}
+
+	if (!userExists) {return 1;}
+	else {return 0;} 
+}
+
+
+/*
+ * Summary. Function that gets the profile picture for an account
+ *
+ * @param {String} usrname  The username of the account which the profile picture is being extracted
+ *
+ * @return {int} 		  Returns a value depending on invalid information (-1 = Cannot connect to database, 1 = Invalid Username)
+ * @return {object}       Returns a JSON Object with BSON Object containing a buffer array of the profile pic's binary data and a string containing a file name.
+ */
+const getAccountProfilePicture = async function(usrname) {
+	let userExists, info;
+	try {
+
+		//userExists = await db.collection('User Accounts').find({username: usrname}).limit(1).count(true);
+		userExists = await userAccountExists(usrname);
+		if(userExists === -1){return -1;}		
+
+		if (userExists) {
+			info = await db.collection('User Accounts').findOne({username: usrname}, {projection: {profilePic: true}});
+		}
+
+	} catch (err) {
+		console.log(err.stack);
+		return -1;
+	}
+
+	if (!userExists) {
+		console.log("user does not exist")
+		return 1;
+	}
+
+	if(info.profilePic == null) {
+		console.log("no picture")
+		return 2;
+	}
+	else {return info.profilePic;} 
+}
+
 
 /*
  * Summary. Function that checks if email exists in database
@@ -440,14 +627,55 @@ const userAccountExists = async function(usrname) {
 	return userExists;
 }
 
+/*
+async function test() {
+	await startDatabaseConnection();
+	await clearDatabase();
+    await createAccount("test", "test", "test");
+    let imageBuffer = await readFileAsync('./test/test.png');
+    await updateAccountProfilePicture("test", imageBuffer, "output.png");
+    let dbData = await getAccountProfilePicture('test');
+    //console.log(dbData);
+    writeFileAsync(dbData.name, dbData.data.buffer);
+	await closeDatabaseConnection();
+}
+ test();
+
+function readFileAsync(path) {
+  return new Promise(function (resolve, reject) {
+    fs.readFile(path, function (error, result) {
+      if (error) {
+        reject(error);
+      } else {
+        resolve(result);
+      }
+    });
+  });
+}
+
+function writeFileAsync(path, buffer) {
+  return new Promise(function (resolve, reject) {
+    fs.writeFile(path, buffer, function (error, result) {
+      if (error) {
+        reject(error);
+      } else {
+        resolve(result);
+      }
+    });
+  });
+}
+*/
+
 // Exports Relevant Function so other components of the server can use
 module.exports = {
 	startDatabaseConnection:startDatabaseConnection,
 	closeDatabaseConnection:closeDatabaseConnection,
+	clearDatabase:clearDatabase,
 	createAccount: createAccount,
 	deleteAccount: deleteAccount,
 	getAccountPassword: getAccountPassword,
 	updatePassword: updatePassword,
+	getLeaderboardInfo: getLeaderboardInfo,
 	getAccountStats: getAccountStats,
 	updateAccountStats: updateAccountStats,
 	getAccountStatus:getAccountStatus,
@@ -455,6 +683,10 @@ module.exports = {
 	getAccountEmail: getAccountEmail,
 	getAccountInfo: getAccountInfo,
 	updateAccountTitle: updateAccountTitle,
+	updateAccountUnlockedTitles: updateAccountUnlockedTitles,
+	updateAccountSpellbook: updateAccountSpellbook,
+	getAccountProfilePicture: getAccountProfilePicture,
+	updateAccountProfilePicture: updateAccountProfilePicture,
 	accountEmailExists: accountEmailExists,
 	userAccountExists: userAccountExists
 };
