@@ -91,7 +91,7 @@ const createAccount = async function(usrname, pass, mail) {
 		"eloRating": -1,
 		"wins": 0,
 		"losses": 0,
-		"spellbook": [-1 , -1 , -1 , -1 ,-1]
+		"spellbook": [1, 2, 3, 4, 5]
 	};
 
 	let userExists, emailExists;
