@@ -257,13 +257,6 @@ io.on('connection', (socket) => {
   	return;
   });
 
-  socket.on('updateCurrentSpellbook', async function (username, spellbook){
-    console.log(username + " " + spellbook);
-    let result;
-    result = await account_management.updateAccountSpellbook(username, spellbook);
-    return;
-  });
-
   socket.on('getLeaderboardInfo', async function(startRank, endRank){
   	let leaderboardInfo = {
   		"valid": -1,
@@ -271,7 +264,7 @@ io.on('connection', (socket) => {
     	"userInfo": []
    	};
   
-    let info = await leaderboardInfo.getLeaderboardInfo(startRank, endRank);
+    let info = await account_management.getLeaderboardInfo(startRank, endRank);
 
     if(info === -1) {
     	leaderboardInfo.valid = info;
@@ -336,6 +329,7 @@ io.on('connection', (socket) => {
   	let stats = await account_management.getAccountStats(username);
   	stats.eloRating = elo;
   	stats.level = level;
+  	
   	if(loss === true) {
   		stats.losses = stats.losses + 1;
   	} else {
