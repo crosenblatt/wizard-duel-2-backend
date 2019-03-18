@@ -20,6 +20,7 @@ async function server_init() {
 	await account_management.startDatabaseConnection();
 };
 
+//Comment
 server_init();
 
 var rooms = [];
