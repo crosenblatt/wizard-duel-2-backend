@@ -484,6 +484,35 @@ const updateAccountUnlockedTitles = async function(usrname, unlocked_titles) {
 }
 
 /*
+ * Summary. Function that updates the current spellbook of a user account.
+ *
+ * @param {String}      usrname 		 The username of the account which the stats are being updated
+ * @param {INT array}   new_spellbook    The updated active title of the user account
+ *
+ * @return {int} Returns a value depending on invalid information (-1 = Cannot connect to database, 0 = valid, 1 = Invalid Username) 
+ */
+const updateAccountSpellbook = async function(usrname, new_spellbook) {
+	let userExists;
+	try {
+
+		//userExists = await db.collection('User Accounts').find({username: usrname}).limit(1).count(true);
+		userExists = await userAccountExists(usrname);
+		if(userExists === -1){return -1;}	
+
+		if (userExists) {
+			await db.collection('User Accounts').updateOne({username: usrname}, {$set: {spellbook: new_spellbook}});
+		}
+
+	} catch (err) {
+		console.log(err.stack);
+		return -1;
+	}
+
+	if (!userExists) {return 1;}
+	else {return 0;} 
+}
+
+/*
  * Summary. Function that updates the active profile picture of a user account.
  *
  * @param {String} 		 usrname 	  The username of the account which the profile picture is being updated
@@ -655,6 +684,7 @@ module.exports = {
 	getAccountInfo: getAccountInfo,
 	updateAccountTitle: updateAccountTitle,
 	updateAccountUnlockedTitles: updateAccountUnlockedTitles,
+	updateAccountSpellbook: updateAccountSpellbook,
 	getAccountProfilePicture: getAccountProfilePicture,
 	updateAccountProfilePicture: updateAccountProfilePicture,
 	accountEmailExists: accountEmailExists,
