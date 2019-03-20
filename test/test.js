@@ -627,6 +627,70 @@ describe("Backend Tests", function() {
 			});
         });
 
+        describe("#updateAccountSpellbook", function () {
+        	//Takes a second to communicate with the database
+			this.slow(10000);
+			this.timeout(10000);
+
+			it("should return that the spells were correctly updated.", async () => {
+				let username, password, hash, email;
+
+				username = generateTestString();
+				password = generateTestString();
+				hash = account_validation.hashPassword(password);
+				email = generateTestString();
+
+				let spells = [5];
+				for(let i = 0; i < 5; i++){ spells[i] = Math.floor(Math.random() * (25)) + 1;}
+
+				await account_management.createAccount(username, hash, email);
+				await account_management.updateAccountSpellbook(username, spells);	
+
+				let result;
+				result = await account_management.getAccountInfo(username);
+
+				await account_management.deleteAccount(username);
+
+				spells.forEach((e1)=>result.spellbook.forEach((e2)=> {
+					if(e1 === e2){same = true;}
+					else{same = false;}
+  				}));
+
+				assert(same);
+			});
+
+			it("should return that the spells were not updated.", async () => {
+				let username, other_user, password, hash, email, other_email;
+
+				username = generateTestString();
+				other_user = generateTestString();
+				password = generateTestString();
+				hash = account_validation.hashPassword(password);
+				email = generateTestString();
+				other_email = generateTestString();
+
+				let spells = [5];
+				for(let i = 0; i < 5; i++){ spells[i] = Math.floor(Math.random() * (25)) + 1;}
+
+				await account_management.createAccount(username, hash, email);
+				await account_management.createAccount(other_user, hash, other_email);
+
+				await account_management.updateAccountSpellbook(username, spells);	
+
+				let result;
+				result = await account_management.getAccountInfo(other_user);
+				
+				await account_management.deleteAccount(username);
+				await account_management.deleteAccount(other_user);
+			
+				spells.forEach((e1)=>result.spellbook.forEach((e2)=> {
+					if(e1 === e2){same = true;}
+					else{same = false;}
+  				}));
+				assert(!(same));
+			});
+
+        });
 	});
 
 	// Password Reset System Tests -> MAKE SURE TO HAVE TRANSPORTER CORRECTLY SET IN 'password_reset.js'
