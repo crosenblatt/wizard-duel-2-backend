@@ -84,7 +84,7 @@ io.on('connection', (socket) => {
                 console.log(name + " found room " + p.room);
                 var room = { "room" : p.room };
                     socket.emit("room", room); 
-                    break;
+                    return;
             }
         } //endwhile
             
@@ -361,8 +361,15 @@ io.on('connection', (socket) => {
   called when a game ends
   */
   socket.on('leave', function(room) {
-    console.log("game over, leaving room");
+    console.log("game over, leaving room" + room);
     socket.leave(room);
+    var index = 0;
+    rooms.forEach(function(r) {
+        if(r.name == room) {
+            rooms.splice(index, 1);
+        }
+        index++;
+    })
   });
 
   /*disconnect: Self explanatory, used when a user exits a room */
