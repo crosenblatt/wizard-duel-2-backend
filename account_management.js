@@ -628,44 +628,27 @@ const userAccountExists = async function(usrname) {
 	return userExists;
 }
 
+
 /*
-async function test() {
-	await startDatabaseConnection();
-	await clearDatabase();
-    await createAccount("test", "test", "test");
-    let imageBuffer = await readFileAsync('./test/test.png');
-    await updateAccountProfilePicture("test", imageBuffer, "output.png");
-    let dbData = await getAccountProfilePicture('test');
-    //console.log(dbData);
-    writeFileAsync(dbData.name, dbData.data.buffer);
-	await closeDatabaseConnection();
+ * Summary. Function that uses ELO to re-rank players
+ *
+ * @return {int} Returns a value depending on if username exists (-1 = Cannot connect to database) 
+ */
+const reRank = async function() {
+	let temp;
+  	try {
+    	 let index = 1;
+		const cursor = await db.collection('User Accounts').find().sort({eloRating: -1});
+		while(await cursor.hasNext()) {
+  			const doc = await cursor.next();
+  			// process doc here
+  			db.collection('User Accounts').updateOne({_id: doc._id}, {$set: {rank: index}});
+  			index++;
+		}
+	} catch (err) {
+		return -1;
+	}
 }
- test();
-
-function readFileAsync(path) {
-  return new Promise(function (resolve, reject) {
-    fs.readFile(path, function (error, result) {
-      if (error) {
-        reject(error);
-      } else {
-        resolve(result);
-      }
-    });
-  });
-}
-
-function writeFileAsync(path, buffer) {
-  return new Promise(function (resolve, reject) {
-    fs.writeFile(path, buffer, function (error, result) {
-      if (error) {
-        reject(error);
-      } else {
-        resolve(result);
-      }
-    });
-  });
-}
-*/
 
 // Exports Relevant Function so other components of the server can use
 module.exports = {
@@ -689,5 +672,6 @@ module.exports = {
 	getAccountProfilePicture: getAccountProfilePicture,
 	updateAccountProfilePicture: updateAccountProfilePicture,
 	accountEmailExists: accountEmailExists,
-	userAccountExists: userAccountExists
+	userAccountExists: userAccountExists,
+	reRank: reRank
 };

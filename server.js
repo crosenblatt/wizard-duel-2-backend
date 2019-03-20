@@ -345,8 +345,9 @@ io.on('connection', (socket) => {
   	}
 
   	//TODO: RECALCULATE RANK METHOD -> SORT DATABASE BASED ON NEW ELO
-
   	await account_management.updateAccountStats(username, stats);
+  	await account_management.reRank();
+  	stats = await account_management.getAccountStats(username);
 
   	let result = {
   		"rank": stats.rank
