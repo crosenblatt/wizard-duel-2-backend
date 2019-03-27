@@ -146,13 +146,13 @@ io.on('connection', (socket) => {
                     "name" : r.players[0].name,
                     "health" : r.players[0].health,
                     "mana" : r.players[0].mana,
-                    "spells" : r.players[0].spells,
+                    "spells" : r.players[0].spellbook,
                     "level": r.players[0].level,
                     "elo": r.players[0].elo,
                     "title": r.players[0].title 
                 }
 
-                console.log("getting existing user: " + r.players[0].name)
+                console.log("getting existing user: " + r.players[0].spellbook)
                 socket.emit("getuser", user)
                 return;
             }
