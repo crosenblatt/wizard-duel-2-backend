@@ -12,8 +12,9 @@ app = express(),
 server = http.createServer(app),
 //Comment
 io = require('socket.io').listen(server);
+const port=process.env.PORT || 3000;
 app.get('/', (req, res) => {
-res.send('Server is running on port 3000')
+res.send('Server is running on port' + port)
 });
 
 async function server_init() {
@@ -384,6 +385,6 @@ process.on('SIGINT', async function() {
 	process.exit(0);
 });
 
-server.listen(3000,()=>{
+server.listen(port,()=>{
     console.log('Node app is running on port 3000, hi' );
 });

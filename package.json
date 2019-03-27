@@ -5,7 +5,8 @@
         "test": "test"
     },
     "scripts": {
-        "test": "mocha"
+        "test": "mocha",
+        "start": "node server.js"
     },
     "dependencies": {
         "bcryptjs": "^2.4.3",
