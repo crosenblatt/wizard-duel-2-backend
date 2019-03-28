@@ -255,13 +255,15 @@ io.on('connection', (socket) => {
             if(room.size == 0 && lobbyFound == false){
                 p.room = room.name;
                 room.addPlayer(p);
-                socket.join(room);
+                socket.join(room.name);
                 console.log(username + " joined lobby " + p.room);    
-                lobby = p.room.name; 
+                lobby = p.room; 
                 lobbyFound = true;
             }
          });
     }
+
+      console.log(io.sockets.adapter.rooms);
 	  io.in(lobby).emit('login', result);
   });
 
@@ -445,7 +447,7 @@ io.on('connection', (socket) => {
         if(room.size == 0 && lobbyFound == false){
             p.room = room.name;
             room.addPlayer(p);
-            socket.join(room);
+            socket.join(room.name);
             console.log(username + " joined lobby " + p.room);
             lobbyFound = true;     
         }
