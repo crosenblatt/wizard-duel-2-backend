@@ -247,19 +247,22 @@ io.on('connection', (socket) => {
     	result.userInfo = info;
 
     	// Join a lobby
-    	verifyLobbies();
+      verifyLobbies();
+      var lobby = null;
     	var p = new Player(username, result.userInfo.eloRating, result.userInfo.level, result.userInfo.spellbook, result.userInfo.title);
     	var lobbyFound = false;
         lobbies.forEach(function(room) {
             if(room.size == 0 && lobbyFound == false){
                 p.room = room.name;
                 room.addPlayer(p);
-                console.log(username + " joined lobby " + p.room);     
+                socket.join(room);
+                console.log(username + " joined lobby " + p.room);    
+                lobby = p.room.name; 
                 lobbyFound = true;
             }
          });
     }
-	socket.emit('login', result);
+	  io.in(lobby).emit('login', result);
   });
 
   socket.on('getUserStats', async function(username){
@@ -442,6 +445,7 @@ io.on('connection', (socket) => {
         if(room.size == 0 && lobbyFound == false){
             p.room = room.name;
             room.addPlayer(p);
+            socket.join(room);
             console.log(username + " joined lobby " + p.room);
             lobbyFound = true;     
         }
@@ -465,10 +469,13 @@ io.on('connection', (socket) => {
 	};
 
     if (lobby == null) {
-    	socket.emit("UserNotFound", message);
+      socket.emit("UserNotFound", message);
+      console.log("Custom Invite User Not Found " + recepientUsername)
     } else {
-    	message.invite = senderUsername + " has invited you to a custom game!";
-    	socket.broadcast.to(lobby).emit('gameInvite', message);
+      message.invite = senderUsername + " has invited you to a custom game!";
+      console.log("User found in lobby " + lobby);
+      console.log(message);
+    	socket.to(lobby).emit('gameInvite', message);
     }
   });
 
