@@ -32,6 +32,11 @@ class Room {
       return this.size;
     }
 
+    /// get the custom game value of the room
+    getCustomGameID(){
+      return this.customGameID;
+    }
+
   }
 
   module.exports = Room;

@@ -76,7 +76,7 @@ io.on('connection', (socket) => {
         lobbies.forEach(function(room) {
         	if(room.size > 0) {
         		if(room.players[0].name === name) {
-        			socket.leave(room);
+        			socket.leave(room.name);
         			console.log(room.players[0].name + " leaving lobby " + room.name);
         			room.players = room.players.filter(function(value, index, arr){
     					return !(value.name === name);
@@ -161,7 +161,7 @@ io.on('connection', (socket) => {
         lobbies.forEach(function(room) {
         	if(room.size > 0) {
         		if(room.players[0].name === name) {
-        			socket.leave(room);
+        			socket.leave(room.name);
         			console.log(room.players[0].name + " leaving lobby " + room.name);
         			room.players = room.players.filter(function(value, index, arr){
     					return !(value.name === name);
@@ -433,7 +433,7 @@ io.on('connection', (socket) => {
     			return !(value.name === username);
     		});
     		rooms[i].size = rooms[i].size - 1; 
-    		rooms[i].customGameID = 0;
+    		if(rooms[i].size == 0) {rooms[i].customGameID = 0;}
     	}
     }
     
@@ -501,7 +501,7 @@ io.on('connection', (socket) => {
     	socket.emit("UserNotFound", message);
     } else {
     	message.invite = recepientUsername + " has declined your custom game!";
-    	socket.broadcast.to(lobby).emit('gameDeclined', message);
+    	socket.to(lobby).emit('gameDeclined', message);
     }
   });
 
@@ -544,7 +544,7 @@ io.on('connection', (socket) => {
     	message.invite = recepientUsername + " has accepted!";
     	message.room = r;
 
-    	socket.broadcast.to(lobby1).to(lobby2).emit('gameAccepted', message);
+    	socket.to(lobby1).to(lobby2).emit('gameAccepted', message);
     }
   });
 
