@@ -30,6 +30,11 @@ for(var i = 0; i < 10; i++){
     //rooms[i].addPlayer(new Player("test" + i, (i * 50) + 100))
 }
 
+var lobbies = [];
+for(var i = 0; i < 10; i++){
+	lobbies.push(new Room());
+}
+
 function verifyRooms() {
     rooms.forEach(function(room) {
         if( room.size < 2) {
@@ -40,6 +45,19 @@ function verifyRooms() {
     for( var i = 0; i < 5; i++) {
         rooms.push(new Room());
     }
+}
+
+function verifyLobbies() {
+	lobbies.forEach(function(room){
+		if(room.size < 1) {
+			return;
+		}
+	});
+
+	//make new lobbies because all lobbies are full
+	for(var i = 0; i < 5; i++) {
+		rooms.push(new Room());
+	}
 }
 
 io.on('connection', (socket) => {
@@ -55,6 +73,19 @@ io.on('connection', (socket) => {
         var p = new Player(name, score, level, spellbook, title)
         console.log(name + " enqueued")
 
+        lobbies.forEach(function(room) {
+        	if(room.size > 0) {
+        		if(room.players[0].name === name) {
+        			socket.leave(room);
+        			console.log(room.players[0].name + " leaving lobby " + room.name);
+        			room.players = room.players.filter(function(value, index, arr){
+    					return !(value.name === name);
+    				});
+    				room.size = room.size - 1;
+        		}
+        	}
+        });
+
         // Find first open room and place player in it
         var found = false;
 
@@ -65,11 +96,11 @@ io.on('connection', (socket) => {
         while(eloRange < 50 && !found){
 
             rooms.forEach(function(room) {
-                if(room.size == 1){
+                if(room.size == 1 && room.customGameID == 0){
                     if(Math.abs(score - room.players[0].elo) < eloRange){
                         found = true;
                         p.room = room.name;
-                        room.addPlayer()
+                        room.addPlayer(p);
                         //break;
                     }
                 }
@@ -95,7 +126,7 @@ io.on('connection', (socket) => {
         // If no rooms w/ players found just enter first available room. 
         while(!found){   
         rooms.forEach(function(room) {
-                if(room.size < 2 && !found) {
+                if(room.size < 2 && !found && room.customGameID == 0) {
                     p.room = room.name;
                     room.addPlayer(p);
                     found = true;
@@ -126,6 +157,20 @@ io.on('connection', (socket) => {
         If there are already two people in the room, the server rejects the request
         to join
         */
+
+        lobbies.forEach(function(room) {
+        	if(room.size > 0) {
+        		if(room.players[0].name === name) {
+        			socket.leave(room);
+        			console.log(room.players[0].name + " leaving lobby " + room.name);
+        			room.players = room.players.filter(function(value, index, arr){
+    					return !(value.name === name);
+    				});
+    				room.size = room.size - 1;
+        		}
+        	}
+        });
+
         console.log("accepted");
         socket.join(room);
         console.log("user has joined room: " + room);
@@ -200,6 +245,19 @@ io.on('connection', (socket) => {
     	let info = await account_management.getAccountInfo(username);
     	//console.log(test);
     	result.userInfo = info;
+
+    	// Join a lobby
+    	verifyLobbies();
+    	var p = new Player(username, result.userInfo.eloRating, result.userInfo.level, result.userInfo.spellbook, result.userInfo.title);
+    	var lobbyFound = false;
+        lobbies.forEach(function(room) {
+            if(room.size == 0 && lobbyFound == false){
+                p.room = room.name;
+                room.addPlayer(p);
+                console.log(username + " joined lobby " + p.room);     
+                lobbyFound = true;
+            }
+         });
     }
 	socket.emit('login', result);
   });
@@ -360,17 +418,127 @@ io.on('connection', (socket) => {
   remove a user from a room
   called when a game ends
   */
-  socket.on('leave', function(room) {
-    console.log("game over, leaving room" + room);
+  socket.on('leave', function(username, room) {
+    console.log("game over, leaving room " + room);
     socket.leave(room);
-    var index = 0;
-    rooms.forEach(function(r) {
-        if(r.name == room) {
-            rooms.splice(index, 1);
-        }
-        index++;
-    })
+
+    for( var i = 0; i < rooms.length; i++) {
+    	if (rooms[i].name === room) {
+    		rooms[i].players = rooms[i].players.filter(function(value, index, arr){
+    			return !(value.name === username);
+    		});
+    		rooms[i].size = rooms[i].size - 1; 
+    		rooms[i].customGameID = 0;
+    	}
+    }
+    
   });
+
+  socket.on('joinLobby', function(username, elo, level, spellbook, title) {
+    var lobbyFound = false;
+    verifyLobbies();
+    var p = new Player(username, elo, level, spellbook, title);
+    lobbies.forEach(function(room) {
+        if(room.size == 0 && lobbyFound == false){
+            p.room = room.name;
+            room.addPlayer(p);
+            console.log(username + " joined lobby " + p.room);
+            lobbyFound = true;     
+        }
+    });
+  }); 
+
+  /*invite sender sends invite to recepient user -> sender to recepient*/
+  socket.on('sendInvite', function(senderUsername, recepientUsername, customValues){
+  	var lobby = null;
+    lobbies.forEach(function(room) {
+        if(room.size > 0) {
+        	if(room.players[0].name === recepientUsername) {
+        		lobby = room.name;
+        	}
+ 		}
+ 	});
+
+	let  message = { 
+		"invite": "UNABLE TO FIND USER",
+		"customValues": customValues
+	};
+
+    if (lobby == null) {
+    	socket.emit("UserNotFound", message);
+    } else {
+    	message.invite = senderUsername + " has invited you to a custom game!";
+    	socket.broadcast.to(lobby).emit('gameInvite', message);
+    }
+  });
+
+  /*recepient accepts -> recepient to sender*/ 
+  socket.on('declineInvite', function(recepientUsername, senderUsername){
+  	var lobby = null;
+    lobbies.forEach(function(room) {
+        if(room.size > 0) {
+        	if(room.players[0].name === senderUsername) {
+        		lobby = room.name;
+        	}
+
+ 		}
+ 	});
+
+	let  message = { 
+		"invite": "UNABLE TO FIND USER",
+	};
+
+    if (lobby == null) {
+    	socket.emit("UserNotFound", message);
+    } else {
+    	message.invite = recepientUsername + " has declined your custom game!";
+    	socket.broadcast.to(lobby).emit('gameDeclined', message);
+    }
+  });
+
+  socket.on('acceptInvite', function(recepientUsername, senderUsername) {
+  	var lobby1 = null;
+  	var lobby2 = null;
+    lobbies.forEach(function(room) {
+        if(room.size > 0) {
+        	if(room.players[0].name === senderUsername) {
+        		lobby1 = room.name;
+        	}
+        	if(room.players[0].name === recepientUsername) {
+        		lobby2 = room.name;
+        	}
+
+ 		}
+ 	});
+
+
+	let  message = { 
+		"invite": "UNABLE TO FIND USER",
+		"room": "-1"
+	};
+
+    if (lobby1 == null || lobby2 == null) {
+    	socket.emit("UserNotFound", message);
+    } else {
+
+ 		var transform = false;
+ 		var r;
+ 		verifyRooms();
+ 		rooms.forEach(function(rooms){
+ 			if(room.size == 0 && transform == false) {
+ 				room.customGameID = 1;
+ 				transform = true;
+ 				r = room.name;
+ 			}
+ 		});
+
+    	message.invite = recepientUsername + " has accepted!";
+    	message.room = r;
+
+    	socket.broadcast.to(lobby1).to(lobby2).emit('gameAccepted', message);
+    }
+  });
+
 
   /*disconnect: Self explanatory, used when a user exits a room */
   socket.on('disconnect', function() {
