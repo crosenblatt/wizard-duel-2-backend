@@ -691,6 +691,53 @@ describe("Backend Tests", function() {
 			});
 
         });
+
+        describe("#updateAccountStatus", function () {
+        	//Takes a second to communicate with the database
+			this.slow(10000);
+			this.timeout(10000);
+
+			it("should return that user was successfully logged in.", async () => {
+				let username, password, hash, newPassword, newHash, email, result;
+				username = generateTestString();
+				password = generateTestString();
+				hash = account_validation.hashPassword(password);
+				newPassword = generateTestString();
+				newHash = account_validation.hashPassword(newPassword);
+				email = generateTestString();
+
+				try{
+					await account_management.createAccount(username, hash, email);
+					await account_management.updateAccountStatus(username, true);
+					result = (await account_management.getAccountStatus(username)) ? 1 : 0;
+					await account_management.deleteAccount(username);
+				} catch(err){
+					throw(err);
+				}
+				assert(result === 1);
+			});
+
+			it("should return that user was successfully logged out.", async () => {
+				let username, password, hash, newPassword, newHash, email, result;
+				username = generateTestString();
+				password = generateTestString();
+				hash = account_validation.hashPassword(password);
+				newPassword = generateTestString();
+				newHash = account_validation.hashPassword(newPassword);
+				email = generateTestString();
+
+				try{
+					await account_management.createAccount(username, hash, email);
+					await account_management.updateAccountStatus(username, true);
+					await account_management.updateAccountStatus(username, false);
+					result = (await account_management.getAccountStatus(username)) ? 1 : 0;
+					await account_management.deleteAccount(username);
+				} catch(err){
+					throw(err);
+				}
+				assert(result === 0);
+			});
+        });
 	});
 
 	// Password Reset System Tests -> MAKE SURE TO HAVE TRANSPORTER CORRECTLY SET IN 'password_reset.js'
@@ -928,3 +975,8 @@ function generateTestString() {
 
 	return string;
 }
+
+process.on('SIGINT', async function() {
+	await account_management.closeDatabaseConnection();
+	process.exit(0);
+});

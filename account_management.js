@@ -334,7 +334,7 @@ const updateAccountStatus = async function(usrname, status) {
  * @param {String} usrname  The username of the account which the email is being extracted
  *
  * @return {int} 	Returns a value depending on invalid information (-1 = Cannot connect to database, 1 = Invalid Username)
- * @return {String} Returns a string of the account's email
+ * @return {String} Returns a boolean of user's status
  */
 const getAccountStatus = async function(usrname) {
 	let userExists, status;
