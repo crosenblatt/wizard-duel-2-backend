@@ -817,7 +817,7 @@ describe("Backend Tests", function() {
 						var p = new Player(name, elo)
 						assert(p.elo = elo);
 					});
-					it("should construct players to valid defauly parameters", () => {
+					it("should construct players to valid default parameters", () => {
 						var p = new Player("abc", 123);
 						assert(p.health == 100 && p.mana == 100 && p.room == '-1');
 					});
@@ -853,10 +853,54 @@ describe("Backend Tests", function() {
 						r.addPlayer(p);
 						assert(r.getSize() == 1);
 					});
-
-				});
-			}); 
+		}); 
     });
+
+	// Room Class Tests
+	describe("room_class", function(){
+		describe('buildCustomRooms', function (){
+			it("should set the custom game value of a room properly", () => {
+				var rooms = [];
+				for(var i = 0; i < 10; i++) {
+					rooms.push(new Room());
+				}
+
+				rooms[5].customGameID = 1;
+
+				var test = null;
+
+				rooms.forEach(function(room){
+					if(room.customGameID == 1) {
+						test = room;
+					}
+				});
+
+				assert(test === rooms[5]);
+			});
+
+			it("should return all non-custom game rooms of a list of rooms", () => {
+				var rooms = [];
+				for(var i = 0; i < 10; i++) {
+					rooms.push(new Room());
+				}
+
+				rooms[5].customGameID = 1;
+
+				var temp = rooms[5];
+				var test = null;
+
+				for(var i = 0; i < rooms.length; i++) {
+					if(rooms[i].customGameID == 1) {
+						test = rooms.splice(i, 1);
+					}
+				}
+
+				assert(test[0] === temp && !rooms.includes(temp));
+			});
+
+		});
+	});
+});
 
 /*
  * Summary. Function that generates temporary strings for the tests

@@ -6,6 +6,7 @@ class Room {
       this.name = this.generateRoomName()
       this.size = 0;
       this.players = [];
+      this.customGameID = 0;
     }
 
     // create random room name
@@ -30,7 +31,12 @@ class Room {
     getSize(){
       return this.size;
     }
-  
+
+    /// get the custom game value of the room
+    getCustomGameID(){
+      return this.customGameID;
+    }
+
   }
 
   module.exports = Room;
