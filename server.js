@@ -277,7 +277,8 @@ io.on('connection', (socket) => {
     };
 
     result.valid = await account_management.updateAccountStatus(username, false);
-
+    
+    // If user is logged out in database, removed from any lobbies.
     if(result.valid === 0) {
       lobbies.forEach(function(room) {
         if(room.size > 0) {
