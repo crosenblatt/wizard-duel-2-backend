@@ -264,8 +264,37 @@ io.on('connection', (socket) => {
          });
     }
 
-      console.log(io.sockets.adapter.rooms);
+    //console.log(io.sockets.adapter.rooms);
 	  io.in(lobby).emit('login', result);
+  });
+
+  // returns -1 if it can't connect to the server, returns 0 if valid, and returns 1 if user doesn't exist
+  socket.on('logoutAccount', async function(username){
+    console.log(username + " logged out.");
+
+    let result = { 
+      "valid": -1
+    };
+
+    result.valid = await account_management.updateAccountStatus(username, false);
+
+    if(result.valid === 0) {
+      lobbies.forEach(function(room) {
+        if(room.size > 0) {
+          if(room.players[0].name === username) {
+            socket.leave(room.name);
+            console.log(room.players[0].name + " leaving lobby " + room.name);
+            room.players = room.players.filter(function(value, index, arr){
+              return !(value.name === username);
+            });
+            room.size = room.size - 1;
+          }
+        }
+      });
+    }
+    
+    socket.emit('logout', result);
+
   });
 
   socket.on('getUserStats', async function(username){
