@@ -564,7 +564,7 @@ io.on('connection', (socket) => {
  		var transform = false;
  		var r;
  		verifyRooms();
- 		rooms.forEach(function(rooms){
+ 		rooms.forEach(function(room){
  			if(room.size == 0 && transform == false) {
  				room.customGameID = 1;
  				transform = true;
@@ -575,7 +575,10 @@ io.on('connection', (socket) => {
     	message.invite = recepientUsername + " has accepted!";
     	message.room = r;
 
-    	socket.to(lobby1).to(lobby2).emit('gameAccepted', message);
+      //socket.to(lobby1).to(lobby2).emit('gameAccepted', message);
+      [lobby1, lobby2].forEach(function(l) {
+        socket.in(l).emit('gameAccepted', message);
+      });
     }
   });
 
