@@ -470,6 +470,7 @@ io.on('connection', (socket) => {
     
   });
 
+  // Randomly Joins an open lobby
   socket.on('joinLobby', function(username, elo, level, spellbook, title) {
     var lobbyFound = false;
     verifyLobbies();
@@ -485,6 +486,62 @@ io.on('connection', (socket) => {
     });
   }); 
 
+  // Joins specific lobby
+  socket.on('joinSpecificLobby', function(username, lobby, elo, level, spellbook, title){
+    var lobbyFound = false;
+    var lobby = null;
+    verifyLobbies();
+    var p = new Player(username, elo, level, spellbook, title);
+    lobbies.forEach(function(room) {
+        if(room.size == 0 && lobbyFound == false && room.name == lobby){
+            p.room = room.name;
+            room.addPlayer(p);
+            socket.join(room.name);
+            console.log(username + " joined lobby " + p.room);
+            lobby = room.name;
+            lobbyFound = true;     
+        }
+    });
+
+    let  message = { 
+		"lobby": lobby		
+	};
+
+	socket.emit('joinedSpecificLobby', message);
+  });
+
+  // Allows user to leave any lobby that they are a part of
+  socket.on('leaveLobby', function(name){
+        lobbies.forEach(function(room) {
+        	if(room.size > 0) {
+        		if(room.players[0].name === name) {
+        			socket.leave(room.name);
+        			console.log(room.players[0].name + " leaving lobby " + room.name);
+        			room.players = room.players.filter(function(value, index, arr){
+    					return !(value.name === name);
+    				});
+    				room.size = room.size - 1;
+        		}
+        	}
+        });
+  });
+
+ // Allows user to leave specific lobby they are a part of
+  socket.on('leaveSpecificLobby', function(name, lobby){
+        lobbies.forEach(function(room) {
+        	if(room.size > 0) {
+        		if(room.players[0].name === name && room.name === lobby) {
+        			socket.leave(room.name);
+        			console.log(room.players[0].name + " leaving lobby " + room.name);
+        			room.players = room.players.filter(function(value, index, arr){
+    					return !(value.name === name);
+    				});
+    				room.size = room.size - 1;
+        		}
+        	}
+        });
+  });
+
   /*invite sender sends invite to recepient user -> sender to recepient*/
   socket.on('sendInvite', function(senderUsername, recepientUsername, customValues){
   	var lobby = null;
@@ -498,7 +555,8 @@ io.on('connection', (socket) => {
 
 	let  message = { 
 		"invite": "UNABLE TO FIND USER",
-		"customValues": customValues
+		"customValues": customValues,
+		"lobby": lobby
 	};
 
     if (lobby == null) {
@@ -525,7 +583,7 @@ io.on('connection', (socket) => {
  	});
 
 	let  message = { 
-		"invite": "UNABLE TO FIND USER",
+		"invite": "UNABLE TO FIND USER"
 	};
 
     if (lobby == null) {
