@@ -481,6 +481,7 @@ io.on('connection', (socket) => {
             room.addPlayer(p);
             socket.join(room.name);
             console.log(username + " joined lobby " + p.room);
+            console.log(io.sockets.adapter.rooms);
             lobbyFound = true;     
         }
     });
@@ -488,23 +489,27 @@ io.on('connection', (socket) => {
 
   // Joins specific lobby
   socket.on('joinSpecificLobby', function(username, lobby, elo, level, spellbook, title){
+    //console.log(lobby);
+    //console.log(io.sockets.adapter.rooms);
     var lobbyFound = false;
-    var lobby = null;
+    var lobbyName = null;
     verifyLobbies();
     var p = new Player(username, elo, level, spellbook, title);
     lobbies.forEach(function(room) {
+        //console.log(room.name + " " + room.size + " " + lobbyFound);
         if(room.size == 0 && lobbyFound == false && room.name == lobby){
             p.room = room.name;
             room.addPlayer(p);
             socket.join(room.name);
             console.log(username + " joined lobby " + p.room);
-            lobby = room.name;
+            //console.log(io.sockets.adapter.rooms);
+            lobbyName = room.name;
             lobbyFound = true;     
         }
     });
 
     let  message = { 
-		"lobby": lobby		
+		"lobby": lobbyName		
 	};
 
 	socket.emit('joinedSpecificLobby', message);
@@ -629,14 +634,14 @@ io.on('connection', (socket) => {
  				r = room.name;
  			}
  		});
-
+     console.log(io.sockets.adapter.rooms);
     	message.invite = recepientUsername + " has accepted!";
     	message.room = r;
-
-      //socket.to(lobby1).to(lobby2).emit('gameAccepted', message);
-      [lobby1, lobby2].forEach(function(l) {
-        socket.in(l).emit('gameAccepted', message);
-      });
+      console.log("lobby 1: " + lobby1);
+      console.log("lobby 2: " + lobby2);
+      io.in(lobby1).emit('gameAccepted', message);
+      io.in(lobby2).emit('gameAccepted', message);
+      //socket.emit('gameAccepted', message);
     }
   });
 
